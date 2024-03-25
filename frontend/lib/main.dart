@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:taste_test/home.dart';
 import 'package:taste_test/login.dart';
 
 void main() {
@@ -33,6 +34,11 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Color.fromARGB(255, 103, 212, 227),
           useMaterial3: true,
         ),
+        routes: {
+      // When navigating to the "/" route, build the FirstScreen widget.
+      // When navigating to the "/second" route, build the SecondScreen widget.
+        'home': (context) => const Home(),
+        },
         home: const LoginPage());
   }
 }
