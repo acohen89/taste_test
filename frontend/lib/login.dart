@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/api_calls.dart';
 import 'package:taste_test/home.dart';
 
@@ -17,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final usernameController = TextEditingController();
     final passwordController = TextEditingController();
-    bool _isLoggedIn = false;
     @override
     void dispose() {
       // Clean up the controller when the widget is disposed.
@@ -26,36 +27,46 @@ class _LoginPageState extends State<LoginPage> {
       super.dispose();
     }
 
-    if (_isLoggedIn) {
-    } else {
-      return Scaffold(
-          body: Container(
-        padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.10),
-        child: Column(
+    return Scaffold(
+        body: Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.10),
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Center(
-                child: Text(
-              "Welcome back",
-              style: TextStyle(fontSize: 30),
-            )),
-            const Text("Login to your account"),
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-                hintText: 'Username',
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Center(
+                    child: Text(
+                  "Welcome back",
+                  style: TextStyle(fontSize: 30),
+                )),
+                const Text("Login to your account"),
+              ],
             ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.password),
-                border: OutlineInputBorder(),
-                hintText: 'Password',
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14.0)),
+                    hintText: 'Username',
+                  ),
+                ),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.password),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14.0)),
+                    hintText: 'Password',
+                  ),
+                ),
+              ],
             ),
             ElevatedButton(
                 onPressed: () async {
@@ -68,13 +79,22 @@ class _LoginPageState extends State<LoginPage> {
                       usernameController.text, passwordController.text));
                   Navigator.of(context).pop();
                   if (res.statusCode >= 200 && res.statusCode < 300) {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.setString('token', json.decode(res.body)["token"]);
                     Navigator.of(context).pushNamed("home");
                   } else {}
                 },
-                child: const Text("login"))
+                child: const Text("login")),
+            Row(
+              children: [
+                const Text("Don't have an account?"),
+                TextButton(onPressed: () {
+                  Navigator.of(context).pushNamed("signUp");
+                }, child: const Text("Sign Up"))
+              ],
+            ),
           ],
-        ),
-      ));
-    }
+      )));
   }
 }
