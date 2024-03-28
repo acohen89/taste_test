@@ -20,7 +20,10 @@ def signup(request):
         user.save()
         token = Token.objects.create(user=user)
         return Response({'token': token.key, 'user': serializer.data})
-    return Response(serializer.errors, status=status.HTTP_200_OK)
+    if "username" in serializer.errors: 
+        if serializer.errors["username"][0] == "A user with that username already exists.": 
+            return Response(serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def login(request):
