@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:taste_test/home.dart';
 import 'package:taste_test/login.dart';
+import 'package:taste_test/createRecipe.dart';
 import 'package:taste_test/signUp.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "constants.dart" as constants;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,12 +15,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final bool loggedIn; 
+  final bool loggedIn;
 
-  const MyApp({
-    super.key,
-    required this.loggedIn 
-  });
+  const MyApp({super.key, required this.loggedIn});
 
   // This widget is the root of your application.
   @override
@@ -25,16 +25,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 114, 115, 116)),
-          scaffoldBackgroundColor: const Color.fromARGB(255, 103, 212, 227),
-          useMaterial3: true,
-        ),
+            colorScheme: constants.greyColorScheme,
+            scaffoldBackgroundColor: constants.lightBlue,
+            useMaterial3: true,
+            textTheme: GoogleFonts.anekTeluguTextTheme(Theme.of(context).textTheme)
+            ),
         routes: {
           'home': (context) => const Home(),
           'login': (context) => const LoginPage(),
           'signUp': (context) => const SignUp(),
+          'createRecipe': (context) => const CreateRecipe(),
         },
-        home: loggedIn ? const Home() : const LoginPage() 
-        );
+        home: loggedIn ? const Home() : const LoginPage());
   }
 }

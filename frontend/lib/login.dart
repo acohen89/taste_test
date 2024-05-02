@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                 SizedBox(height: MediaQuery.of(context).size.width * 0.05),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.05),
                 Column(
                   children: [
                     SizedBox(
@@ -90,10 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                                 passwordController.text));
                             Navigator.of(context).pop();
                             if (res.statusCode >= 200 && res.statusCode < 300) {
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.setString(
-                                  'token', json.decode(res.body)["token"]);
+                              await setPrefs(res.body); 
                               Navigator.of(context).pushNamed("home");
                             } else {}
                           },
@@ -114,5 +111,16 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             )));
+  }
+  
+  setPrefs(String res) async {
+    SharedPreferences prefs =await SharedPreferences.getInstance();
+    Map body = json.decode(res); 
+    prefs.setString('token', body["token"]);
+    prefs.setInt('id', body["user"]["id"]);
+    prefs.setString('username', body["user"]["username"]);
+    prefs.setString('first_name', body["user"]["first_name"]);
+    prefs.setString('last_name', body["user"]["last_name"]);
+    prefs.setString('email', body["user"]["email"]);
   }
 }
