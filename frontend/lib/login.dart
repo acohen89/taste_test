@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/api_calls.dart';
-import 'package:taste_test/home.dart';
+import 'package:taste_test/constants.dart' as constants;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                       controller: usernameController,
                       decoration: InputDecoration(
                         isDense: true,
-                        prefixIcon: Icon(Icons.person),
+                        prefixIcon: const Icon(Icons.person),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14.0)),
                         hintText: 'Username',
@@ -86,13 +86,23 @@ class _LoginPageState extends State<LoginPage> {
                                   return const Center(
                                       child: CircularProgressIndicator());
                                 });
-                            Response res = (await login(usernameController.text,
-                                passwordController.text));
+                            Response res = await login(usernameController.text,
+                                passwordController.text);
                             Navigator.of(context).pop();
-                            if (res.statusCode >= 200 && res.statusCode < 300) {
-                              await setPrefs(res.body); 
-                              Navigator.of(context).pushNamed("home");
-                            } else {}
+                              if (res.statusCode < 300) {
+                                setPrefs(res.body);
+                                Navigator.of(context).pushNamed("home"); 
+                                return; 
+                              }
+                              if(res.statusCode == 404){
+                                loginErrorPopUp(
+                                    "Username or password does not match");
+                                return; 
+                              } if(res.statusCode >= 500){
+                                loginErrorPopUp(
+                                    "Error logging in, please try again later");
+                                return;
+                              }
                           },
                           child: const Text("Login")),
                     ),
@@ -112,15 +122,20 @@ class _LoginPageState extends State<LoginPage> {
               ],
             )));
   }
-  
-  setPrefs(String res) async {
-    SharedPreferences prefs =await SharedPreferences.getInstance();
-    Map body = json.decode(res); 
+
+  void setPrefs(String res) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Map body = json.decode(res);
     prefs.setString('token', body["token"]);
     prefs.setInt('id', body["user"]["id"]);
     prefs.setString('username', body["user"]["username"]);
     prefs.setString('first_name', body["user"]["first_name"]);
     prefs.setString('last_name', body["user"]["last_name"]);
     prefs.setString('email', body["user"]["email"]);
+  }
+
+  void loginErrorPopUp(String text) {
+    final snack = constants.snackBarError(text);
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }

@@ -14,7 +14,7 @@ class Ingredient {
 
   @override
   String toString() {
-    return "$quantity $unit $food";
+    return "$quantity ${unit.name} $food";
   }
 }
 

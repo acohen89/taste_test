@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:taste_test/api_calls.dart";
 import "package:taste_test/classes/IngredientClass.dart";
+import "package:taste_test/home.dart";
 import "constants.dart" as constants;
 
 class CreateRecipe extends StatefulWidget {
@@ -64,7 +65,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           Text(
                             missingInputText,
                             style: const TextStyle(
-                                color: Colors.red, fontStyle: FontStyle.italic),
+                                color: constants.errorRedColor, fontStyle: FontStyle.italic),
                           )
                         ],
                       )
@@ -173,7 +174,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   const Text(
                     ingredientErrorText,
                     style: TextStyle(
-                        color: Colors.red,
+                        color: constants.errorRedColor,
                         fontSize: 14,
                         fontStyle: FontStyle.italic),
                   ),
@@ -187,9 +188,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         icon: const Icon(Icons.format_list_bulleted_add))
                   ],
                 ),
-                SizedBox(
-                    height:
-                        MediaQuery.of(context).size.width * spaceBetweenBoxes),
                 const Row(
                   children: [
                     Text("Procedure",
@@ -260,9 +258,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           print(res.body);
                           setState(() => waitingForApiCallBack = false);
                           if(res.statusCode >= 300){
-                            setState(() => missingInputText = "Creating recipe failed");
+                            createErrorPopUp("Error creating recipe");
                             return;
                           }
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const Home()));
                         },
                         child: const Text(
                           "Create Recipe",
@@ -274,6 +273,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
             ),
           ),
         ));
+        
+  }
+   void createErrorPopUp(String text){
+    final snack = constants.snackBarError(text); 
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
   void deleteIFromIngredientsAddedController(int index) {

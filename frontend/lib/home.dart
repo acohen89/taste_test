@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/api_calls.dart';
 import 'package:taste_test/classes/RecipeClass.dart';
+import "constants.dart" as constants;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,85 +19,166 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String? name;
   String? token;
-  bool _hasRecipes = false;
+  double blurValue = 0; 
+  List<Recipe>? recipes;
+  Recipe? focusedRecipe;
+  bool loadingRecipes = false;
+  static const recipePadding = EdgeInsets.only(left: 10, right: 10, bottom: 8);
   @override
   void initState() {
     super.initState();
-    retrieveUserDetails();
+    retrieveUserDetails().then((_) {
+      if (token == null) return;
+      setState(() => loadingRecipes = true);
+      getUserRecipes(token!).then((response) {
+        if (response.statusCode >= 300) {
+          loadingError("Error loading recipes");
+          setState(() => loadingRecipes = false);
+          return;
+        }
+        setState(() {
+          recipes = jsonDecode(response.body)
+              .map<Recipe>((r) => Recipe.fromJson(r))
+              .toList();
+          loadingRecipes = false;
+        });
+      }).catchError((e) {
+        print(e);
+        loadingError("Error loading recipes");
+        setState(() => loadingRecipes = false);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text("Your Recipes")),
-        drawer: Drawer(
-            child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+    return Stack(
+      children: [
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
+          child: Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: const Text("Your Recipes"),
+                actions: [
+                  IconButton(
+                      onPressed: () => Navigator.pushNamed(context, "createRecipe"),
+                      icon: const Icon(Icons.add))
+                ],
               ),
-              child: Text('Hello $name'),
-            ),
-            ListTile(
-              title: const Text('Logout'),
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove('token');
-                Navigator.pop(context);
-                if (context.mounted) Navigator.of(context).pushNamed("login");
-              },
-            ),
-          ],
-        )),
-        body: Builder(builder: (context) {
-          if (_hasRecipes) {
-            //
-            return Container(
-                // display recipes
-                );
-          }
-          return Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.06),
-                  child: Center(
-                      child: Text(
-                    "Create your first recipe",
-                    style: TextStyle(
-                      fontSize: 60.0,
-                      color: Color.fromARGB(160, 120, 120, 115),
-                      fontWeight: FontWeight.w300,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(
-                              0.2), // Reduced opacity for a more subtle shadow
-                          offset: Offset(2, 2), // Adjusted offset
-                          blurRadius: 5, // Reduced blur radius
-                        ),
-                      ],
+              drawer: Drawer(
+                  child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
                     ),
-                    textAlign: TextAlign.center,
-                  )),
-                ),
-                SizedBox(height: MediaQuery.of(context).size.width * 0.1),
-                createRecipeButton()
-              ],
-            ),
-          );
-        }));
+                    child: Text('Hello $name'),
+                  ),
+                  ListTile(
+                    title: const Text('Logout'),
+                    onTap: () async {
+                      deleteUserDetails();
+                      Navigator.pop(context);
+                      if (context.mounted) Navigator.of(context).pushNamed("login");
+                    },
+                  ),
+                ],
+              )),
+              body: Builder(builder: (context) {
+                if (loadingRecipes) {
+                  return const SpinKitWave(color: constants.lightBlue, size: 50);
+                }
+                if (recipes != null && recipes!.isNotEmpty) {
+                  List<Recipe> recps = recipes!;
+                  return ListView(
+                    children: List.generate(recps.length, (i) {
+                      return Padding(
+                        padding: recipePadding,
+                        child: RecipeCard(
+                            recipe: recps[i], removeFunc: removeRecipe, index: i, setFocusRecipe: setFocusRecipe,),
+                      );
+                    }),
+                  );
+                }
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.06),
+                      child: Center(
+                          child: Text(
+                        "Create your first recipe",
+                        style: TextStyle(
+                          fontSize: 60.0,
+                          color: const Color.fromARGB(160, 120, 120, 115),
+                          fontWeight: FontWeight.w300,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(
+                                  0.2), // Reduced opacity for a more subtle shadow
+                              offset: Offset(2, 2), // Adjusted offset
+                              blurRadius: 5, // Reduced blur radius
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      )),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.width * 0.1),
+                    const createRecipeButton()
+                  ],
+                );
+              })),
+        ),
+          focusedRecipe != null ? FullRecipeCard(recipe: focusedRecipe!, exitFocusedRecipe: exitFocusedRecipe,) : Container(),
+      ],);
   }
 
-  void retrieveUserDetails() async {
+  Future<void> retrieveUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       name = prefs.getString('first_name') ?? '';
       token = prefs.getString('token') ?? '';
     });
+    return;
+  }
+
+  void deleteUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+    prefs.remove('id');
+    prefs.remove('username');
+    prefs.remove('first_name');
+    prefs.remove('last_name');
+    prefs.remove('email');
+  }
+  
+  void setFocusRecipe(Recipe r){
+    setState(() {
+      focusedRecipe = r;
+      blurValue = 8;
+    });
+  }
+
+  void exitFocusedRecipe(){
+    setState(() {
+      focusedRecipe = null;
+      blurValue = 0;
+    });
+  }
+  
+  void removeRecipe(int index) {
+    setState(() {
+      recipes!.removeAt(index);
+    });
+  }
+
+  void loadingError(String text) {
+    final snack = constants.snackBarError(text);
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
 
@@ -106,9 +191,6 @@ class createRecipeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return RawMaterialButton(
       onPressed: () async {
-        // var r = await getUserRecipes("826848d8a0a9d06ca1daf110bbd11cd3d098e6c0");
-        // Recipe rec = Recipe.fromJson(jsonDecode(r.body)[0]);
-        // print(rec.title);
         Navigator.pushNamed(context, "createRecipe");
       },
       elevation: 2.0,
