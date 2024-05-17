@@ -2,17 +2,46 @@
 POST http://127.0.0.1:8000/signup 
 Content-Type: application/json
 
-{ "username": "adam21", "first_name": "adam", "last_name": "Cohen", "password": "Pass1234!", "email": "adam@mail.com" }
+{ "username": "acohen89", "first_name": "adam", "last_name": "Cohen", "password": "Pass1234!", "email": "adam@mail.com" }
 
 ###
 
 POST http://127.0.0.1:8000/login 
 Content-Type: application/json
 
-{ "username": "adam79", "password": "Pass1234!" }
+{ "username": "adameco", "password": "CohenWifi##800" }
 
 ###
 
 GET http://127.0.0.1:8000/test_token 
 Content-Type: application/json
-Authorization: token xxx
+Authorization: token 5862c5c587b5de5d2384d0f8f04bf2a789e7b52e
+
+###
+POST http://127.0.0.1:8000/recipe/create_recipe
+Content-Type: application/json
+Authorization: token 5862c5c587b5de5d2384d0f8f04bf2a789e7b52e
+
+{
+    "userId": 1, 
+    "beginningRecipe": "True", 
+    "title": "Spaghetti Bolognese",  
+    "created": "2024-04-11T10:00:00Z",  
+    "last_edited": "2024-04-11T12:00:00Z", 
+    "ingredients": [
+        "200g spaghetti", 
+        "1 onion",
+        "400g canned tomatoes",
+        "Salt", "Black pepper"
+    ],
+    "image_url": "https://example.com/spaghetti-bolognese.jpg", 
+    "procedure": [
+        "Step 1: Cook spaghetti according to package directions.",  
+        "Step 2: In a pan, cook the minced beef until browned.",
+        "Step 3: Add chopped onion and garlic, cook until softened.",
+        "Step 4: Add tomatoes, tomato paste, and seasonings. Simmer.",
+        "Step 5: Serve sauce over spaghetti."
+    ],
+    "notes": "Garnish with fresh basil and grated Parmesan cheese.", 
+    "in_progress": "False" 
+}
