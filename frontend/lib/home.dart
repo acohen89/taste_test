@@ -20,6 +20,7 @@ class _HomeState extends State<Home> {
   String? name;
   String? token;
   double blurValue = 0; 
+  int deleteIPIndex = -1;
   List<Recipe>? recipes;
   Recipe? focusedRecipe;
   bool loadingRecipes = false;
@@ -97,7 +98,7 @@ class _HomeState extends State<Home> {
                       return Padding(
                         padding: recipePadding,
                         child: RecipeCard(
-                            recipe: recps[i], removeFunc: removeRecipe, index: i, setFocusRecipe: setFocusRecipe,),
+                            recipe: recps[i], removeFunc: removeRecipe, index: i, setFocusRecipe: setFocusRecipe, deleteInProgressToggle: deleteInProgressOnIndex, deleteIPIndex: deleteIPIndex, resetDeleteIndex: resetDeleteIndex),
                       );
                     }),
                   );
@@ -133,7 +134,9 @@ class _HomeState extends State<Home> {
                 );
               })),
         ),
-          focusedRecipe != null ? FullRecipeCard(recipe: focusedRecipe!, exitFocusedRecipe: exitFocusedRecipe,) : Container(),
+          focusedRecipe != null ? Scaffold( 
+            backgroundColor: Colors.transparent,
+            body: FullRecipeCard(recipe: focusedRecipe!, exitFocusedRecipe: exitFocusedRecipe,)) : Container(),
       ],);
   }
 
@@ -155,7 +158,14 @@ class _HomeState extends State<Home> {
     prefs.remove('last_name');
     prefs.remove('email');
   }
-  
+  void deleteInProgressOnIndex(int index){
+    setState(() => deleteIPIndex = index);
+  }
+
+  void resetDeleteIndex(){
+    setState(() => deleteIPIndex = -1);
+  }
+
   void setFocusRecipe(Recipe r){
     setState(() {
       focusedRecipe = r;
