@@ -1,0 +1,8 @@
+- Add logo to home screen 
+- Bottom doc with create recipe, recipes in progress, and look at complete recipes
+- Ability to add images for recipes 
+- Current recipe screen: ingredients on one slide, prep on another https://ibb.co/LP6CzRM 
+- Iterate recipe screen: first working recipe on one page, then show a little indicator of
+current iterations at the top. Be able to swipe horizontally to see. As you scroll past the final one
+have a create new iteration button. Autofill information from last. Have a rating system for each recipe iteration,
+allow user to create custom categories 

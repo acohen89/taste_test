@@ -27,7 +27,7 @@ Future<http.Response> createRecipe(String token, String title,
     "ingredients": ingredients,
     "image_url": null,
     "procedure": procedure,
-    "notes": notes,
+    "notes": notes.isEmpty ? null : notes, 
     "in_progress": true,
   });
   try {

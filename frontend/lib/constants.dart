@@ -7,10 +7,10 @@ const Color errorRedColor = Color.fromARGB(255, 228, 88, 88);
 ColorScheme greyColorScheme =
     ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 114, 115, 116));
 
-SnackBar snackBarError(String text) {
+SnackBar snackBarError(String text, int duration) {
   return SnackBar(
     content: Text(text, textAlign: TextAlign.center,),
-    duration: const Duration(milliseconds: 2250),
+    duration:  Duration(milliseconds: duration),
     backgroundColor: errorRedColor,
     elevation: 10,
     behavior: SnackBarBehavior.floating,

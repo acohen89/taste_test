@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:taste_test/home.dart';
-import 'package:taste_test/login.dart';
-import 'package:taste_test/createRecipe.dart';
+import 'package:taste_test/Pages/home.dart';
+import 'package:taste_test/Pages/settings.dart';
+import 'package:taste_test/Pages/inProgressRecipes.dart';
+import 'package:taste_test/Pages/login.dart';
+import 'package:taste_test/Recipe/createRecipe.dart';
 import 'package:taste_test/signUp.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Taste Test',
         theme: ThemeData(
             colorScheme: constants.greyColorScheme,
             scaffoldBackgroundColor: constants.lightBlue,
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
           'login': (context) => const LoginPage(),
           'signUp': (context) => const SignUp(),
           'createRecipe': (context) => const CreateRecipe(),
+          'settings': (context) => const Settings(),
+          'inProgressRecipes': (context) => const inProgressRecipes(),
         },
         home: loggedIn ? const Home() : const LoginPage());
   }

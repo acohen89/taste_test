@@ -2,121 +2,13 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/api_calls.dart';
-import 'package:taste_test/classes/IngredientClass.dart';
-import "package:taste_test/constants.dart" as constants;
 import 'package:intl/intl.dart';
-import "package:taste_test/home.dart";
-
-class Recipe {
-  final int id;
-  final String title;
-  final bool beginningRecipe;
-  final String? parentRID;
-  final String created;
-  final String last_edited;
-  final List ingredients;
-  final String? image_url;
-  final List procedure;
-  final String? notes;
-  final bool in_progress;
-  final List iteration_ids;
-
-  Recipe(
-      this.id,
-      this.title,
-      this.beginningRecipe,
-      this.parentRID,
-      this.created,
-      this.last_edited,
-      this.ingredients,
-      this.image_url,
-      this.procedure,
-      this.notes,
-      this.in_progress,
-      this.iteration_ids);
-
-  Recipe.fromJson(Map<String, dynamic> json)
-      : id = json['id'] as int,
-        title = json['title'] as String,
-        beginningRecipe = json['beginningRecipe'] as bool,
-        parentRID = json['parentRID'] as String?,
-        created = json['created'] as String,
-        last_edited = json['last_edited'] as String,
-        ingredients = json['ingredients'] as List,
-        image_url = json['image_url'] as String?,
-        procedure = json['procedure'] as List,
-        notes = json['notes'] as String?,
-        in_progress = json['in_progress'] as bool,
-        iteration_ids = json['iteration_ids'] as List;
-
-  @override
-  String toString() {
-    return title;
-  }
-}
-
-class FullRecipeCard extends StatefulWidget {
-  final Recipe recipe;
-  final Function exitFocusedRecipe;
-  const FullRecipeCard(
-      {super.key, required this.recipe, required this.exitFocusedRecipe});
-
-  @override
-  State<FullRecipeCard> createState() => _FullRecipeCardState();
-}
-
-class _FullRecipeCardState extends State<FullRecipeCard> {
-  //style
-  final titleStyle = GoogleFonts.merriweatherSans(
-      color: Colors.black,
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-      letterSpacing: -0.8);
-  final titlePadding = const EdgeInsets.symmetric(horizontal: 24);
-  final borderMargin =
-      const EdgeInsets.only(left: 28, right: 28, bottom: 48, top: 60);
-  final boxStyle = BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(
-        color: constants.greyColor,
-        width: 4,
-      ));
-  final backIcon = const Icon(size: 35, Icons.arrow_back_rounded);
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: borderMargin, // 12 px padding on all sides
-      decoration: boxStyle,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              IconButton(
-                  onPressed: () => widget.exitFocusedRecipe(), icon: backIcon)
-            ],
-          ),
-          Padding(
-            padding: titlePadding,
-            child: Text(
-              widget.recipe.title,
-              style: titleStyle,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Divider(),
-        ],
-      ),
-    );
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taste_test/Recipe/RecipeClass.dart';
+import 'package:taste_test/api_calls.dart';
+import 'package:taste_test/constants.dart' as constants;
 
 class RecipeCard extends StatefulWidget {
   final Recipe recipe;
@@ -139,7 +31,7 @@ class RecipeCard extends StatefulWidget {
   static const bullet = "\u2022 ";
   static const double imageHeight = 84;
   static const double imageWidth = 150;
-  static const double ingLeftPadding = 25;
+  static const double sidePadding = 26;
 
   @override
   State<RecipeCard> createState() => _RecipeCardState();
@@ -147,13 +39,15 @@ class RecipeCard extends StatefulWidget {
 
 class _RecipeCardState extends State<RecipeCard> {
   //Padding
-  final titlePadding = const EdgeInsets.only(
-      top: 12, left: RecipeCard.ingLeftPadding, right: 12);
+  final titlePadding =
+      const EdgeInsets.only(top: 12, left: RecipeCard.sidePadding, right: 12);
 
-  final individualIngPadding = const EdgeInsets.only(bottom: 4);
-
-  final ingPadding =
-      const EdgeInsets.only(left: RecipeCard.ingLeftPadding, top: 8);
+  final sidePadding = 26.0;
+  final procandIngPadding = const EdgeInsets.only(
+      left: RecipeCard.sidePadding,
+      top: 8,
+      bottom: 4,
+      right: RecipeCard.sidePadding);
 
   final lastEditedPadding = const EdgeInsets.only(right: 12, bottom: 8);
 
@@ -176,7 +70,8 @@ class _RecipeCardState extends State<RecipeCard> {
 
   @override
   Widget build(BuildContext context) {
-    final disableButtons = widget.deleteIPIndex != -1; 
+    final disableButtons = widget.deleteIPIndex != -1;
+
     final blurValue =
         widget.deleteIPIndex == -1 || widget.deleteIPIndex == widget.index
             ? 0.0
@@ -188,51 +83,59 @@ class _RecipeCardState extends State<RecipeCard> {
         child: deletingRecipe
             ? deleteRecipeAnimation
             : GestureDetector(
-                onTap: () => {
-                  if(!disableButtons)
-                  widget.setFocusRecipe(widget.recipe)
-                  },
+                onTap: () =>
+                    {if (!disableButtons) widget.setFocusRecipe(widget.recipe)},
                 child: Card(
                     shape: cardShape,
                     elevation: cardElevation,
                     shadowColor: constants.greyColor,
                     color: Colors.white,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Column(
-                          children: [
-                            Padding(
-                              padding: titlePadding,
+                        Container(
+                          padding: titlePadding,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Text(
+                                widget.recipe.title,
+                                style: titleStyle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              )),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Container(
+                              padding: procandIngPadding,
+                              height: 200,
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
-                                      child: Text(
-                                    widget.recipe.title,
-                                    style: titleStyle,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  )),
+                                      child: ListView.builder(
+                                          itemCount:
+                                              widget.recipe.ingredients.length,
+                                          itemBuilder:
+                                              (BuildContext context, int i) {
+                                            return Text(RecipeCard.bullet +
+                                                widget.recipe.ingredients[i]);
+                                          })),
+                                  Expanded(
+                                      child: ListView.builder(
+                                          itemCount:
+                                              widget.recipe.procedure.length,
+                                          itemBuilder:
+                                              (BuildContext context, int i) {
+                                            return Text(
+                                                "${i + 1}. ${widget.recipe.procedure[i]}");
+                                          })),
                                 ],
-                              ),
-                            ),
-                            Padding(
-                              padding: ingPadding,
-                              child: ListView(
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                children: List.generate(
-                                    widget.recipe.ingredients.length, (i) {
-                                  return Padding(
-                                    padding: individualIngPadding,
-                                    child: Text(RecipeCard.bullet +
-                                        widget.recipe.ingredients[i]),
-                                  );
-                                }),
-                              ),
-                            ),
-                          ],
+                              )),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -288,8 +191,8 @@ class _RecipeCardState extends State<RecipeCard> {
     );
   }
 
-  void deleteRecipeErrorPopUp(String text) {
-    final snack = constants.snackBarError(text);
+  void deleteRecipeErrorPopUp(String text, {int duration = 2250}) {
+    final snack = constants.snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 

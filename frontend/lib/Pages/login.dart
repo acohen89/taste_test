@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -134,8 +132,8 @@ class _LoginPageState extends State<LoginPage> {
     prefs.setString('email', body["user"]["email"]);
   }
 
-  void loginErrorPopUp(String text) {
-    final snack = constants.snackBarError(text);
+  void loginErrorPopUp(String text, {int duration=2250}) {
+    final snack = constants.snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
