@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
-import "package:taste_test/constants.dart" as constants;
+import "package:taste_test/Shared/constants.dart"; 
 
 class FullRecipeCard extends StatefulWidget {
   final Recipe recipe;
@@ -30,7 +30,7 @@ class _FullRecipeCardState extends State<FullRecipeCard> {
       color: Colors.white,
       borderRadius: BorderRadius.circular(24),
       border: Border.all(
-        color: constants.greyColor,
+        color: greyColor,
         width: 4,
       ));
 

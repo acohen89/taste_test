@@ -4,7 +4,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/api_calls.dart';
+import 'package:taste_test/Shared/apiCalls.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});

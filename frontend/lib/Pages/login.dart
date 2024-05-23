@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/api_calls.dart';
-import 'package:taste_test/constants.dart' as constants;
+import 'package:taste_test/Shared/apiCalls.dart';
+import 'package:taste_test/Shared/constants.dart' as constants;
+import 'package:taste_test/Shared/globalFunctions.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -133,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void loginErrorPopUp(String text, {int duration=2250}) {
-    final snack = constants.snackBarError(text, duration);
+    final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }

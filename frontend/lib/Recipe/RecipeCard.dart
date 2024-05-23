@@ -7,8 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
-import 'package:taste_test/api_calls.dart';
-import 'package:taste_test/constants.dart' as constants;
+import 'package:taste_test/Shared/apiCalls.dart';
+import 'package:taste_test/Shared/constants.dart';
+import 'package:taste_test/Shared/globalFunctions.dart';
 
 class RecipeCard extends StatefulWidget {
   final Recipe recipe;
@@ -57,10 +58,10 @@ class _RecipeCardState extends State<RecipeCard> {
 
   final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      side: const BorderSide(color: constants.lightBlue, width: 4));
+      side: const BorderSide(color: lightBlue, width: 4));
 
   final deleteRecipeAnimation =
-      const SpinKitCubeGrid(color: constants.lightBlue, size: 200);
+      const SpinKitCubeGrid(color: lightBlue, size: 200);
 
   final dt = DateFormat('h:mm a M-d');
   final lastEditedTexStyle = const TextStyle(fontSize: 11);
@@ -88,7 +89,7 @@ class _RecipeCardState extends State<RecipeCard> {
                 child: Card(
                     shape: cardShape,
                     elevation: cardElevation,
-                    shadowColor: constants.greyColor,
+                    shadowColor: greyColor,
                     color: Colors.white,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -192,14 +193,14 @@ class _RecipeCardState extends State<RecipeCard> {
   }
 
   void deleteRecipeErrorPopUp(String text, {int duration = 2250}) {
-    final snack = constants.snackBarError(text, duration);
+    final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
   Future<bool> confirmDelete(BuildContext context, String title) {
     final Completer<bool> completer = Completer<bool>();
     final yesButtonStyle = OutlinedButton.styleFrom(
-      backgroundColor: constants.lightBlue,
+      backgroundColor: lightBlue,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
       ),
@@ -207,7 +208,7 @@ class _RecipeCardState extends State<RecipeCard> {
     final noButtonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: const BorderSide(color: constants.lightBlue, width: 1.2)),
+          side: const BorderSide(color: lightBlue, width: 1.2)),
     );
 
     final snack = SnackBar(

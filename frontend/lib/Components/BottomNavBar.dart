@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import "package:taste_test/constants.dart" as constants;
+import "package:taste_test/Shared/constants.dart" as constants;
+import 'package:taste_test/Shared/constants.dart';
 
 
 class BottomNavBar extends StatefulWidget {
@@ -20,10 +21,12 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
+    const containerPadding = 4.0; 
+    const iconPadding = EdgeInsets.only(top: 2, left: 4, right: 4, bottom: 2);
     return Container(
       color: Colors.white,
-      child:  Padding(
-        padding: EdgeInsets.all(4),
+      child:  Container(
+        padding: const EdgeInsets.only(bottom:containerPadding, left: containerPadding, right: containerPadding, top:containerPadding),
         child: GNav(
           selectedIndex: widget.startIndex,
           onTabChange: (value) {
@@ -40,12 +43,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
             }
           },
          backgroundColor: Colors.white,
-         color: constants.greyColor, 
+         color: greyColor, 
          activeColor: Colors.white,
-         tabBackgroundColor: constants.greyColor,
-         gap: 8, 
-         padding: EdgeInsets.all(8),
-          tabs: [
+         tabBackgroundColor: greyColor,
+         gap: 4, 
+         padding: iconPadding, 
+          tabs: const [
             GButton(
               icon: Icons.done,
               text: 'Finished Recipes',

@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import "package:taste_test/constants.dart" as constants;
+import "package:taste_test/Shared/constants.dart" as constants;
 
 enum Unit { g, ml, cup, tsp, tbs, gal, L, oz }
 

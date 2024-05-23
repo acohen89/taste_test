@@ -7,7 +7,7 @@ import 'package:taste_test/Recipe/createRecipe.dart';
 import 'package:taste_test/signUp.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import "constants.dart" as constants;
+import "Shared/constants.dart" as constants;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         title: 'Taste Test',
         theme: ThemeData(
             colorScheme: constants.greyColorScheme,
-            scaffoldBackgroundColor: constants.lightBlue,
+            scaffoldBackgroundColor: Colors.white,
             useMaterial3: true,
             textTheme: GoogleFonts.anekTeluguTextTheme(Theme.of(context).textTheme)
             ),

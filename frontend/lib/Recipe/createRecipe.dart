@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:taste_test/Components/BottomNavBar.dart";
-import "package:taste_test/api_calls.dart";
+import "package:taste_test/Shared/apiCalls.dart";
+import "package:taste_test/Shared/constants.dart";
 import "package:taste_test/Ingredient/IngredientClass.dart";
 import "package:taste_test/Pages/home.dart";
-import "../constants.dart" as constants;
+import "package:taste_test/Shared/globalFunctions.dart";
+
 
 class CreateRecipe extends StatefulWidget {
   const CreateRecipe({super.key});
@@ -37,7 +39,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
     const double ingredientInputRadius = 6;
     const TextStyle headingStyle = TextStyle(
       fontSize: 30,
-      color: constants.lightBlue,
+      color: lightBlue,
     );
     const double inputBoxRadius = 12;
 
@@ -51,11 +53,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
               left: edgePadding,
               right: edgePadding,
               bottom: bottomPadding,
-              top: topPadding),
+              top: topPadding
+              ),
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: titleSpace),
+                // const SizedBox(height: titleSpace),
                 const Row(
                   children: [
                     Text("Title", style: headingStyle),
@@ -70,7 +73,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     isDense: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(inputBoxRadius),
-                      borderSide: const BorderSide(color: constants.greyColor),
+                      borderSide: const BorderSide(color: greyColor),
                     ),
                     hintText: 'enter recipe title',
                   ),
@@ -114,7 +117,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             borderRadius:
                                 BorderRadius.circular(ingredientInputRadius),
                             borderSide:
-                                const BorderSide(color: constants.greyColor),
+                                const BorderSide(color: greyColor),
                           ),
                           hintText: '',
                         ),
@@ -144,7 +147,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             borderRadius:
                                 BorderRadius.circular(ingredientInputRadius),
                             borderSide:
-                                const BorderSide(color: constants.greyColor),
+                                const BorderSide(color: greyColor),
                           ),
                           hintText: '',
                         ),
@@ -264,14 +267,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     isDense: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(inputBoxRadius),
-                      borderSide: const BorderSide(color: constants.greyColor),
+                      borderSide: const BorderSide(color: greyColor),
                     ),
                     hintText: 'any notes on this recipe',
                   ),
                 ),
                 const SizedBox(height: titleSpace),
                 waitingForApiCallBack
-                    ? const SpinKitWave(color: constants.lightBlue, size: 50)
+                    ? const SpinKitWave(color: lightBlue, size: 50)
                     : SizedBox(
                         width: 200,
                         child: TextButton(
@@ -280,7 +283,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   side: const BorderSide(
-                                      color: constants.lightBlue, width: 1)),
+                                      color: lightBlue, width: 1)),
                             ),
                             onPressed: () async {
                               if (titleController.text.isEmpty) {
@@ -327,7 +330,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             child: const Text(
                               "Create Recipe",
                               style: TextStyle(
-                                  color: constants.lightBlue,
+                                  color: lightBlue,
                                   fontWeight: FontWeight.bold),
                             )),
                       )
@@ -350,7 +353,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   }
 
   void errorPopUp(String text, {int duration = 2250}) {
-    final snack = constants.snackBarError(text, duration);
+    final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
