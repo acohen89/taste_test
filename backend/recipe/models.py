@@ -22,7 +22,7 @@ class Recipe(models.Model):
     last_edited = models.DateTimeField(auto_now=True)  # Change `auto_now_add` to `auto_now`
     ingredients = ArrayField(models.CharField(max_length=75))
     image_url = models.URLField(null=True)
-    procedure = ArrayField(models.TextField())
+    procedure = ArrayField(models.CharField(max_length=75))
     notes = models.TextField(null=True)
     in_progress = models.BooleanField(default=False)  # Make sure to add `default` argument
     iteration_ids = models.ManyToManyField("Recipe", default=None, related_name="iterations")

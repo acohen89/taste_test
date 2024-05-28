@@ -21,8 +21,6 @@ def create_recipe(request):
                 ur = UserRecipes.objects.get(pk=request.user.pk)
                 recipe = Recipe.objects.get(pk=recipeSerializer.data["id"])
                 ur.recipesId.add(recipe)
-                # recipeQuery = UserRecipes.objects.get(pk=request.user.pk).recipesId.all()
-                # res = [{"id": recipe.id, "title": recipe.title} for recipe in recipeQuery]
                 return Response(recipeSerializer.data, status=status.HTTP_202_ACCEPTED)
             else:
                 URSData = {"userId": request.user.pk, "recipesId": [recipeSerializer.data["id"]]}
@@ -33,9 +31,11 @@ def create_recipe(request):
                 else: 
                     return Response(URSerializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         else:
+            print("here")
+            curRecipe = Recipe.objects.get(pk=recipeSerializer.data["id"])
             mainRecipe = Recipe.objects.get(pk=request.data["parentRID"])
-            mainRecipe.iteration_ids.add(recipeSerializer.data["id"])
-            return Response(recipeSerializer.data, status=status.HTTP_400_BAD_REQUEST) 
+            mainRecipe.iteration_ids.add(curRecipe)
+            return Response(recipeSerializer.data, status=status.HTTP_201_CREATED) 
     else:
         return Response(recipeSerializer.errors, status=status.HTTP_400_BAD_REQUEST) 
     
@@ -44,17 +44,18 @@ def create_recipe(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 def get_user_recipes(request):
-    recipes = [RecipeSerializer(r).data for r in UserRecipes.objects.get(pk=request.user.pk).recipesId.all()]
-    # res = list(UserRecipes.objects.get(pk=request.user.pk).recipesId.all())
+    recipes = [RecipeSerializer(r).data for r in UserRecipes.objects.get(pk=request.user.pk).recipesId.all().order_by("-last_edited")]
     return Response(recipes, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 def get_recipe(request):
-    if not Recipe.objects.filter(pk=request.data['id']).exists(): 
+    id = request.GET.get('id', '')
+    if id == '': return Response({"Message":"No id parameter given"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    if not Recipe.objects.filter(pk=id).exists(): 
         return Response({"message": "Recipe ID not found"}, status=status.HTTP_404_NOT_FOUND) 
-    recipe = Recipe.objects.get(pk=request.data['id'])
+    recipe = Recipe.objects.get(pk=id)
     mainRecipe = RecipeSerializer(recipe)
     iterations = [RecipeSerializer(r).data for r in recipe.iteration_ids.all()]
     ret = {"mainRecipe": mainRecipe.data, "iterations": iterations}
@@ -63,14 +64,16 @@ def get_recipe(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
-def get_recipe(request):
-    if not Recipe.objects.filter(pk=request.data['id']).exists(): 
-        return Response({"message": f"Recipe ID: {request.data['id']} not found"}, status=status.HTTP_404_NOT_FOUND) 
-    recipe = Recipe.objects.get(pk=request.data['id'])
-    mainRecipe = RecipeSerializer(recipe)
+def get_recipe_iterations(request):
+    id = request.GET.get('id', '')
+    if id == '': return Response({"Message":"No id parameter given"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    if not Recipe.objects.filter(pk=id).exists(): 
+        return Response({"message": "Recipe ID not found"}, status=status.HTTP_404_NOT_FOUND) 
+    recipe = Recipe.objects.get(pk=id)
+    if not recipe.iteration_ids.exists() or not recipe.beginningRecipe:
+        return Response({"Message":f"Iteration ids does not exist or beginningRecipe is {recipe.beginningRecipe}"},status=status.HTTP_404_NOT_FOUND)
     iterations = [RecipeSerializer(r).data for r in recipe.iteration_ids.all()]
-    ret = {"mainRecipe": mainRecipe.data, "iterations": iterations}
-    return Response(ret, status=status.HTTP_202_ACCEPTED)
+    return Response({"iterations": iterations}, status=status.HTTP_202_ACCEPTED)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
