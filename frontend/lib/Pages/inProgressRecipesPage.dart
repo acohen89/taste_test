@@ -7,6 +7,7 @@ import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
 import 'package:taste_test/Components/noRecipe.dart';
+import 'package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart';
 import 'package:taste_test/Recipe/inProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
@@ -32,8 +33,9 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
 
   @override
   Widget build(BuildContext context) {
-    final cardPadding = EdgeInsets.symmetric(
-        vertical: MediaQuery.of(context).size.height * 0.08, horizontal: MediaQuery.of(context).size.width * 0.05);
+    final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
+    final cardPadding =
+        EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.08, horizontal: horizontalCardPadding);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -46,10 +48,10 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SpinKitWave(color: lightBlue, size: 50);
                 }
-                //TODO: Show dots on side of the screen idicating how many recipes there are 
+                //TODO: Show dots on side of the screen idicating how many recipes there are
                 var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
                 if (!nullOrEmpty) {
-                    List<Recipe>? recipes = snapshot.data; 
+                  List<Recipe>? recipes = snapshot.data;
                   return Column(
                     children: [
                       Expanded(
@@ -61,13 +63,14 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                                 padding: cardPadding,
                                 height: MediaQuery.of(context).size.height,
                                 width: MediaQuery.of(context).size.width,
-                                child: inProgressRecipeCard(recipe: recipes![index]),
+                                child: inProgressRecipeBuilder(
+                                    recipe: recipes![index], horizontalCardPadding: horizontalCardPadding),
                               );
                             }),
                       )
                     ],
                   );
-                } 
+                }
                 return NoRecipes(text: "No In Progress Recipes");
               })),
     );
@@ -91,7 +94,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     } else {
       List<Recipe>? recipes = Recipe.stringsToRecipes(strRecipes);
       if (recipes == null) throw Exception("Error converting string recipes to object");
-      return filter(recipes); 
+      return filter(recipes);
     }
   }
 
