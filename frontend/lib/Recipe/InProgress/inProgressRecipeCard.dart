@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart';
 
-class MyWidget extends StatefulWidget {
-  final double horizontalCardPadding; 
-  const MyWidget({super.key, required this.horizontalCardPadding});
+import 'package:taste_test/Recipe/RecipeClass.dart';
+
+class inProgressRecipeCard extends StatefulWidget {
+  const inProgressRecipeCard({
+    super.key,
+    required this.recipe,
+    required this.horizontalCardPadding,
+  });
+
+  final Recipe recipe;
+  final double horizontalCardPadding;
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<inProgressRecipeCard> createState() => _inProgressRecipeCardState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -18,11 +27,12 @@ class _MyWidgetState extends State<MyWidget> {
       width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
       child: const Column(
         children: [
-          Text(
+          Center(
+              child: Text(
             "Really long string such that it overflows and I can see what happens",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 23),
-          ),
+            style: TextStyle(fontSize: 25),
+          )),
         ],
       ),
     );

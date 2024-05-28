@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
 import 'package:taste_test/Components/noRecipe.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart';
-import 'package:taste_test/Recipe/inProgressRecipeCard.dart';
+import 'package:taste_test/Recipe/OldinProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
@@ -28,7 +28,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
   @override
   void initState() {
     super.initState();
-    recs = loadRecipes();
+    recs = loadMainRecipes();
   }
 
   @override
@@ -81,7 +81,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
-  Future<List<Recipe>?> loadRecipes() async {
+  Future<List<Recipe>?> loadMainRecipes() async {
     List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? strRecipes = prefs.getStringList("recipes");
@@ -98,17 +98,4 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     }
   }
 
-  Future<List<Recipe>?> loadRecipeIterations(String token, List<Recipe> recipes) async {
-    List<Future<Response>> requests = [];
-    for (Recipe r in recipes) {
-      requests.add(getRecipe(token, r.id));
-    }
-    var results = await Future.wait(requests);
-    List<String> ret = [];
-    for (var r in results) {
-      ret.add(jsonEncode(jsonDecode(r.body)["iterations"]));
-    }
-    for (var r in Recipe.stringsToRecipes(ret)!) print(r.title);
-    return Recipe.stringsToRecipes(ret);
-  }
 }

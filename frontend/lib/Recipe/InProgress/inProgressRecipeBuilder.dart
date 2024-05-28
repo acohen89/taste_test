@@ -4,15 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/Components/noRecipe.dart';
+import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
+import 'package:taste_test/Recipe/OldinProgressRecipeCard.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 
 class inProgressRecipeBuilder extends StatefulWidget {
   final Recipe recipe;
-  final double horizontalCardPadding; 
+  final double horizontalCardPadding;
 
   const inProgressRecipeBuilder({super.key, required this.recipe, required this.horizontalCardPadding});
 
@@ -29,6 +30,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     recsReturn = loadRecipeIterations(widget.recipe.id);
   }
 
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Recipe>?>(
         future: recsReturn,
@@ -38,7 +40,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
           }
           var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
           if (nullOrEmpty) {
-            return Container(child: const Center(child: Text("Add bitton ")));
+            return const Center(child: Text("Add button "));
           }
           recipeIterations = snapshot.data;
           // do this so the initial recipe can be displayed first
@@ -54,25 +56,12 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                       scrollDirection: Axis.horizontal,
                       itemCount: recps.length,
                       itemBuilder: (context, index) {
-                        return Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding*2),
-                          child: const Column(
-                            children: [
-                              Center(
-                                  child: Text(
-                                "Really long string such that it overflows and I can see what happens",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 25),
-                              )),
-                            ],
-                          ),
-                        );
+                        return inProgressRecipeCard(horizontalCardPadding: widget.horizontalCardPadding, recipe: recps[index],);
                       },
                       separatorBuilder: (context, index) {
-                        return VerticalDivider(thickness: 20,);
+                        return const VerticalDivider(
+                          thickness: 20,
+                        );
                       }),
                 ),
               ],
@@ -112,3 +101,5 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
+
+
