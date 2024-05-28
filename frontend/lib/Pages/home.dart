@@ -7,6 +7,7 @@ import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Recipe/FullRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeCard.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
+import 'package:taste_test/Components/noRecipe.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 import 'package:taste_test/Shared/constants.dart';
 
@@ -26,19 +27,11 @@ class _HomeState extends State<Home> {
   Recipe? focusedRecipe;
   bool loadingRecipes = false;
   static const recipePadding = EdgeInsets.only(left: 10, right: 10, bottom: 8);
+  late Future<List<Recipe>?> recs;
   @override
   void initState() {
     super.initState();
-    retrieveUserDetails().then((_) async {
-      if (token == null) return;
-      SharedPreferences.getInstance().then((prefs) {
-        setState(() => loadingRecipes = true);
-        updateState(bool state) => setState(() => loadingRecipes = state);
-        setRecipes(List<Recipe> recps) => setState(() => recipes = recps);
-        getRecipesAndSetPrefs(
-            token!, prefs, loadingError, updateState, setRecipes);
-      });
-    });
+    recs = loadRecipes();
   }
 
   @override
@@ -48,17 +41,14 @@ class _HomeState extends State<Home> {
         body: Stack(
           children: [
             ImageFiltered(
-              imageFilter:
-                  ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
+              imageFilter: ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
               child: Scaffold(
                   backgroundColor: const Color.fromARGB(255, 251, 234, 234),
                   appBar: AppBar(
                     title: const Text("Your Recipes"),
                     actions: [
                       IconButton(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, "createRecipe"),
-                          icon: const Icon(Icons.add))
+                          onPressed: () => Navigator.pushNamed(context, "createRecipe"), icon: const Icon(Icons.add))
                     ],
                   ),
                   drawer: Drawer(
@@ -76,66 +66,43 @@ class _HomeState extends State<Home> {
                         onTap: () async {
                           deleteUserDetails();
                           Navigator.pop(context);
-                          if (context.mounted)
-                            Navigator.of(context).pushNamed("login");
+                          if (context.mounted) Navigator.of(context).pushNamed("login");
                         },
                       ),
                     ],
                   )),
-                  body: Builder(builder: (context) {
-                    if (loadingRecipes) {
-                      return const SpinKitWave(color: lightBlue, size: 50);
-                    }
-                    if (recipes != null && recipes!.isNotEmpty) {
-                      List<Recipe> recps = recipes!;
-                      return ListView(
-                        children: List.generate(recps.length, (i) {
-                          return Padding(
-                            padding: recipePadding,
-                            child: RecipeCard(
-                                recipe: recps[i],
-                                removeFunc: removeRecipe,
-                                index: i,
-                                setFocusRecipe: setFocusRecipe,
-                                deleteInProgressToggle: deleteInProgressOnIndex,
-                                deleteIPIndex: deleteIPIndex,
-                                resetDeleteIndex: resetDeleteIndex),
+                  body: FutureBuilder<List<Recipe>?>(
+                      future: recs,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const SpinKitWave(color: lightBlue, size: 50);
+                        }
+                        var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
+                        if (nullOrEmpty) {
+                          return const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              NoRecipes(text: "No finished recipes"),
+                            ],
                           );
-                        }),
-                      );
-                    }
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.06),
-                          child: Center(
-                              child: Text(
-                            "Create your first recipe",
-                            style: TextStyle(
-                              fontSize: 60.0,
-                              color: const Color.fromARGB(160, 120, 120, 115),
-                              fontWeight: FontWeight.w300,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(
-                                      0.2), // Reduced opacity for a more subtle shadow
-                                  offset: Offset(2, 2), // Adjusted offset
-                                  blurRadius: 5, // Reduced blur radius
-                                ),
-                              ],
-                            ),
-                            textAlign: TextAlign.center,
-                          )),
-                        ),
-                        SizedBox(
-                            height: MediaQuery.of(context).size.width * 0.1),
-                        const createRecipeButton()
-                      ],
-                    );
-                  })),
+                        }
+                        List<Recipe> recps = snapshot.data!;
+                        return ListView(
+                          children: List.generate(recps.length, (i) {
+                            return Padding(
+                              padding: recipePadding,
+                              child: RecipeCard(
+                                  recipe: recps[i],
+                                  removeFunc: removeRecipe,
+                                  index: i,
+                                  setFocusRecipe: setFocusRecipe,
+                                  deleteInProgressToggle: deleteInProgressOnIndex,
+                                  deleteIPIndex: deleteIPIndex,
+                                  resetDeleteIndex: resetDeleteIndex),
+                            );
+                          }),
+                        );
+                      })),
             ),
             focusedRecipe != null
                 ? Scaffold(
@@ -147,7 +114,16 @@ class _HomeState extends State<Home> {
                 : Container(),
           ],
         ),
-        bottomNavigationBar: const BottomNavBar(startIndex: 0));
+        bottomNavigationBar: const BottomNavBar(startIndex: 2));
+  }
+
+  Future<List<Recipe>?> loadRecipes() async {
+    await retrieveUserDetails();
+    if (token == null) throw Exception("Null token");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String>? recipesFromPrefs = prefs.getStringList("recipes"); 
+    List<Recipe>? result = recipesFromPrefs == null ? await getRecipesAndSetPrefs(token!, prefs, loadingError) :  Recipe.stringsToRecipes(recipesFromPrefs); 
+    return result?.where((r) => r.in_progress == false).toList();
   }
 
   Future<void> retrieveUserDetails() async {

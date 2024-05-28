@@ -6,32 +6,44 @@ import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
 
-void getRecipesAndSetPrefs(String token, SharedPreferences prefs, loadingError, Function updateLoadingState, Function setRecipes) async {
-    getUserRecipes(token).then((response) {
-        if (response.statusCode >= 300) {
-          loadingError("Error loading recipes");
-          updateLoadingState(false); 
-          return;
-        }
-          var recipes = jsonDecode(response.body)
-              .map<Recipe>((r) => Recipe.fromJson(r))
-              .toList();
-          setRecipes(recipes); 
-          updateLoadingState(false); 
-          List<String> strRecipes = [for (var r in jsonDecode(response.body)) jsonEncode(r)];
-          prefs.setStringList("recipes", strRecipes); 
+Future<List<Recipe>?> getRecipesAndSetPrefs(
+  String token,
+  SharedPreferences prefs,
+  Function loadingError,
+) async {
+  try {
+    final response = await getUserRecipes(token);
+    if (response.statusCode >= 300) {
+      loadingError("Error loading recipes");
+      return null;
+    }
+    var recipes = jsonDecode(response.body)
+        .map<Recipe>((r) => Recipe.fromJson(r))
+        .toList();
 
-      }).catchError((e) {
-        print(e);
-        loadingError("Error loading recipes");
-        updateLoadingState(false); 
-      });
+    await setPrefs(response.body, prefs);
+    return recipes;
+  } catch (e) {
+    print(e);
+    loadingError("Error loading recipes");
+    return null;
   }
+}
+
+Future<void> setPrefs(String responseBody, SharedPreferences prefs) async {
+  List<String> strRecipes = [
+    for (var r in jsonDecode(responseBody)) jsonEncode(r)
+  ];
+  prefs.setStringList("recipes", strRecipes);
+}
 
 SnackBar snackBarError(String text, int duration) {
   return SnackBar(
-    content: Text(text, textAlign: TextAlign.center,),
-    duration:  Duration(milliseconds: duration),
+    content: Text(
+      text,
+      textAlign: TextAlign.center,
+    ),
+    duration: Duration(milliseconds: duration),
     backgroundColor: errorRedColor,
     elevation: 10,
     behavior: SnackBarBehavior.floating,

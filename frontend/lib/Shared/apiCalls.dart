@@ -37,6 +37,23 @@ Future<http.Response> createRecipe(String token, String title,
     return http.Response("", 503, reasonPhrase: e.toString());
   }
 }
+Future<http.Response> getRecipe(String token, int id,) async {
+  try {
+    return await http.get(Uri.parse("${ep}recipe/get_recipe/?id=$id"),
+        headers: authHeader(token));
+  } catch (e) {
+    return http.Response("", 503, reasonPhrase: e.toString());
+  }
+}
+Future<http.Response> getRecipeIterations(String token, int id,) async {
+  try {
+    return await http.get(Uri.parse("${ep}recipe/get_recipe_iterations/?id=$id"),
+        headers: authHeader(token));
+  } catch (e) {
+    return http.Response("", 503, reasonPhrase: e.toString());
+  }
+}
+
 
 Future<http.Response> getUserRecipes(String token) async {
   try {

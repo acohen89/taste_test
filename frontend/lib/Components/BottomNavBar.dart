@@ -31,12 +31,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
           selectedIndex: widget.startIndex,
           onTabChange: (value) {
             switch (value) {
-              case 0: //Finished Recipes
-                Navigator.pushNamed(context, "home");
+              case 0: // In Progress Recipes
+                Navigator.pushNamed(context, "inProgressRecipes");
               case 1: // Create
                 Navigator.pushNamed(context, "createRecipe");
-              case 2: // In Progress Recipes
-                Navigator.pushNamed(context, "inProgressRecipes");
+              case 2: // Finished recipes
+                Navigator.pushNamed(context, "home");
               case 3: // Settings
                 Navigator.pushNamed(context, "settings");
                 
@@ -50,16 +50,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
          padding: iconPadding, 
           tabs: const [
             GButton(
+              icon: Icons.edit,
+              text: 'Recipes In Progress',
+            ),
+            GButton(
               icon: Icons.done,
               text: 'Finished Recipes',
             ),
             GButton(
               icon: Icons.create,
               text: 'Create',
-            ),
-            GButton(
-              icon: Icons.edit,
-              text: 'Recipes In Progress',
             ),
             GButton(
               icon: Icons.settings,

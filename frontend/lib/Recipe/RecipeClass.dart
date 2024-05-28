@@ -4,7 +4,7 @@ class Recipe {
   final int id;
   final String title;
   final bool beginningRecipe;
-  final String? parentRID;
+  final int? parentRID;
   final String created;
   final String last_edited;
   final List ingredients;
@@ -49,7 +49,7 @@ class Recipe {
       : id = json['id'] as int,
         title = json['title'] as String,
         beginningRecipe = json['beginningRecipe'] as bool,
-        parentRID = json['parentRID'] as String?,
+        parentRID = json['parentRID'] as int?,
         created = json['created'] as String,
         last_edited = json['last_edited'] as String,
         ingredients = json['ingredients'] as List,
@@ -61,8 +61,6 @@ class Recipe {
 
 
   static List<Recipe>? stringsToRecipes(List<String> strRecipes){
-    // List<dynamic> mapRecipes =
-    //       strRecipes.map((rec) => jsonDecode(rec)).toList();
     List<dynamic> mapRecipes = [for (var rec in strRecipes) jsonDecode(rec)]; 
       try {
         List<Recipe> recipeList =
@@ -77,6 +75,17 @@ class Recipe {
   String toString() {
     return title;
   }
+
+   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Recipe && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+  
 
 }
 

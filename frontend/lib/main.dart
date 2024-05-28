@@ -40,6 +40,6 @@ class MyApp extends StatelessWidget {
           'settings': (context) => const Settings(),
           'inProgressRecipes': (context) => const inProgressRecipes(),
         },
-        home: loggedIn ? const Home() : const LoginPage());
+        home: loggedIn ? const inProgressRecipes(): const LoginPage());
   }
 }
