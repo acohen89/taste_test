@@ -25,7 +25,6 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     super.initState();
     recs = loadMainRecipes();
   }
-
   @override
   Widget build(BuildContext context) {
     final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
@@ -59,7 +58,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                                 width: MediaQuery.of(context).size.width,
                                 height: MediaQuery.of(context).size.height,
                                 child: inProgressRecipeBuilder(
-                                    recipe: recipes![index], horizontalCardPadding: horizontalCardPadding),
+                                    recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
                               );
                               }
                       )

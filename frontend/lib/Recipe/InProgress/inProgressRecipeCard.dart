@@ -29,35 +29,69 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Center(
-                child: AutoSizeText(widget.recipe.title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              minFontSize: 14,
-              maxLines: 3,
-            )),
+             Title(),
             const Divider(),
             const SizedBox(height: 8),
             const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [for (String ingredient in widget.recipe.ingredients) 
-                RichText(text: TextSpan(
-                      text: bullet,
-                      style: DefaultTextStyle.of(context).style,
-                      children:  <TextSpan>[
-                        TextSpan(text: ingredient, style: const TextStyle(fontSize: 16)),
-                      ],
-                    ),
-                    maxLines: null,)
-                ],
-              ),
-            )
+            Ingredients(context),
+            const SizedBox(height: 8),
+            const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+             Procedure(context),
+            const SizedBox(height: 8),
+            const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+            widget.recipe.notes == null ? 
+            const Text("none", style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),) 
+            : Text(widget.recipe.notes!, maxLines: null,),
+
+
           ],
         ),
       ),
     );
+  }
+
+  Column Procedure(BuildContext context) {
+    return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < widget.recipe.procedure.length; i++)
+                RichText(
+                  text: TextSpan(
+                    text: "${i+1}. ",
+                    style: DefaultTextStyle.of(context).style,
+                    children: <TextSpan>[
+                      TextSpan(text: widget.recipe.procedure[i], style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  maxLines: null,
+                )
+            ],
+          );
+  }
+
+  Column Ingredients(BuildContext context) {
+    return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [for (String ingredient in widget.recipe.ingredients) 
+            RichText(text: TextSpan(
+                  text: bullet,
+                  style: DefaultTextStyle.of(context).style,
+                  children:  <TextSpan>[
+                    TextSpan(text: ingredient, style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+                maxLines: null,)
+            ],
+          );
+  }
+
+  Center Title() {
+    return Center(
+              child: AutoSizeText(widget.recipe.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            minFontSize: 14,
+            maxLines: 3,
+          ));
   }
 }
