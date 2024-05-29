@@ -22,7 +22,7 @@ class inProgressRecipeBuilder extends StatefulWidget {
 }
 
 class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
-  final _cardController = PageController(); 
+  final PageController _controller = PageController();
   List<Recipe>? recipeIterations;
   late Future<List<Recipe>?> recsReturn;
   @override
@@ -39,30 +39,48 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SpinKitWave(color: lightBlue, size: 50);
           }
-          if (snapshot.data == null ) {
+          if (snapshot.data == null) {
             return const Center(child: Text("Add button "));
           }
-          recipeIterations = snapshot.data; 
+          recipeIterations = snapshot.data;
           // do this so the initial recipe can be displayed first
-          if(recipeIterations!.isEmpty) recipeIterations!.add(widget.recipe); 
+          if (recipeIterations!.isEmpty) recipeIterations!.add(widget.recipe);
           if (recipeIterations?[0] != widget.recipe) recipeIterations?.insert(0, widget.recipe);
           if (recipeIterations == null) throw Exception("Recipe iterations null");
           List<Recipe> recps = recipeIterations!;
-          return Card(
-            elevation: 20,
-            child: Row(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: recps.length,
-                      itemBuilder: (context, index) {
-                        return inProgressRecipeCard(horizontalCardPadding: widget.horizontalCardPadding, recipe: recps[index],);
-                      },
+          return Column(
+            children: [
+              Expanded(
+                child: Card(
+                  elevation: 20,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _controller,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: recps.length,
+                          itemBuilder: (context, index) {
+                            return inProgressRecipeCard(
+                              horizontalCardPadding: widget.horizontalCardPadding,
+                              recipe: recps[index],
+                            );
+                          },
+                        ),
                       ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+               Padding(
+                 padding: const EdgeInsets.only(top:4.0),
+                 child: SmoothPageIndicator(
+                  controller: _controller,
+                  count: recps.length,
+                  effect: const WormEffect(dotWidth: 4, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
+                               ),
+               ),
+            ],
           );
         });
   }
@@ -98,5 +116,3 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
-
-

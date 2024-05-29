@@ -18,7 +18,7 @@ class inProgressRecipes extends StatefulWidget {
 }
 
 class _inProgressRecipesState extends State<inProgressRecipes> {
-  // final PageController _controller = PageController();
+  final PageController _controller = PageController();
   bool loadingRecipes = false;
   late Future<List<Recipe>?> recs;
   @override
@@ -30,8 +30,9 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
   @override
   Widget build(BuildContext context) {
     final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
+    const double verticalPadding = 24.0;
     final cardPadding =
-        EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.08, horizontal: horizontalCardPadding);
+        EdgeInsets.only(top: verticalPadding , bottom: verticalPadding-4, left: horizontalCardPadding, right: horizontalCardPadding);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -48,24 +49,37 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                 var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
                 if (!nullOrEmpty) {
                   List<Recipe>? recipes = snapshot.data;
-                  return Column(
-                    children: [
-                      Expanded(
-                          child: PageView.builder(
-                            scrollDirection: Axis.vertical,
-                              // controller: _controller,
-                              itemCount: recipes!.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  color: Colors.white,
-                                  padding: cardPadding,
-                                  width: MediaQuery.of(context).size.width,
-                                  height: MediaQuery.of(context).size.height,
-                                  child: inProgressRecipeBuilder(
-                                      recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
-                                );
-                              }))
-                    ],
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: SmoothPageIndicator(
+                            controller: _controller,
+                            count: recipes!.length,
+                            axisDirection: Axis.vertical,
+                            effect: const WormEffect(dotWidth: 4,  dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
+                          ),
+                        ),
+                        Expanded(
+                            child: PageView.builder(
+                                scrollDirection: Axis.vertical,
+                                controller: _controller,
+                                itemCount: recipes!.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    color: Colors.white,
+                                    padding: cardPadding,
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    child: inProgressRecipeBuilder(
+                                        recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
+                                  );
+                                })),
+                      ],
+                    ),
                   );
                 }
                 return const NoRecipes(text: "No In Progress Recipes");
