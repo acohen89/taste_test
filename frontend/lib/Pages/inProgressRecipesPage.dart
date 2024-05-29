@@ -1,16 +1,11 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart';
-import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
 import 'package:taste_test/Components/noRecipe.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart';
-import 'package:taste_test/Recipe/OldinProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
-import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
 
 import 'package:taste_test/Shared/globalFunctions.dart';
@@ -56,22 +51,22 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                     children: [
                       Expanded(
                         child: ListView.builder(
-                            itemCount: recipes?.length,
-                            itemBuilder: (context, index) {
-                              return Container(
+                          itemCount: recipes!.length,
+                          itemBuilder: (context, index) {
+                            return Container(
                                 color: Colors.white,
                                 padding: cardPadding,
-                                height: MediaQuery.of(context).size.height,
                                 width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
                                 child: inProgressRecipeBuilder(
                                     recipe: recipes![index], horizontalCardPadding: horizontalCardPadding),
                               );
-                            }),
+                              }
                       )
-                    ],
+                  )],
                   );
                 }
-                return NoRecipes(text: "No In Progress Recipes");
+                return const NoRecipes(text: "No In Progress Recipes");
               })),
     );
   }
@@ -85,6 +80,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? strRecipes = prefs.getStringList("recipes");
+    strRecipes = null;
     if (strRecipes == null) {
       String? token = prefs.getString("token");
       if (token == null) throw Exception("Null token");

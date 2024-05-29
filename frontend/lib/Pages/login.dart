@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
-import 'package:taste_test/Shared/constants.dart' as constants;
 import 'package:taste_test/Shared/globalFunctions.dart';
 
 class LoginPage extends StatefulWidget {

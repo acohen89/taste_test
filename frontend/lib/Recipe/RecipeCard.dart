@@ -29,7 +29,6 @@ class RecipeCard extends StatefulWidget {
     required this.deleteIPIndex,
     required this.resetDeleteIndex,
   });
-  static const bullet = "\u2022 ";
   static const double imageHeight = 84;
   static const double imageWidth = 150;
   static const double sidePadding = 26;
@@ -123,7 +122,7 @@ class _RecipeCardState extends State<RecipeCard> {
                                               widget.recipe.ingredients.length,
                                           itemBuilder:
                                               (BuildContext context, int i) {
-                                            return Text(RecipeCard.bullet +
+                                            return Text(bullet +
                                                 widget.recipe.ingredients[i]);
                                           })),
                                   Expanded(

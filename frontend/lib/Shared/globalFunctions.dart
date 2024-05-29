@@ -20,7 +20,6 @@ Future<List<Recipe>?> getRecipesAndSetPrefs(
     var recipes = jsonDecode(response.body)
         .map<Recipe>((r) => Recipe.fromJson(r))
         .toList();
-
     await setPrefs(response.body, prefs);
     return recipes;
   } catch (e) {

@@ -6,7 +6,6 @@ import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
-import 'package:taste_test/Recipe/OldinProgressRecipeCard.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
@@ -38,12 +37,12 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SpinKitWave(color: lightBlue, size: 50);
           }
-          var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
-          if (nullOrEmpty) {
+          if (snapshot.data == null ) {
             return const Center(child: Text("Add button "));
           }
-          recipeIterations = snapshot.data;
+          recipeIterations = snapshot.data; 
           // do this so the initial recipe can be displayed first
+          if(recipeIterations!.isEmpty) recipeIterations!.add(widget.recipe); 
           if (recipeIterations?[0] != widget.recipe) recipeIterations?.insert(0, widget.recipe);
           if (recipeIterations == null) throw Exception("Recipe iterations null");
           List<Recipe> recps = recipeIterations!;
