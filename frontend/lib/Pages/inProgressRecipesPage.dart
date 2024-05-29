@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
 import 'package:taste_test/Components/noRecipe.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart';
@@ -18,6 +18,7 @@ class inProgressRecipes extends StatefulWidget {
 }
 
 class _inProgressRecipesState extends State<inProgressRecipes> {
+  // final PageController _controller = PageController();
   bool loadingRecipes = false;
   late Future<List<Recipe>?> recs;
   @override
@@ -25,6 +26,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     super.initState();
     recs = loadMainRecipes();
   }
+
   @override
   Widget build(BuildContext context) {
     final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
@@ -49,20 +51,21 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                   return Column(
                     children: [
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: recipes!.length,
-                          itemBuilder: (context, index) {
-                            return Container(
-                                color: Colors.white,
-                                padding: cardPadding,
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height,
-                                child: inProgressRecipeBuilder(
-                                    recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
-                              );
-                              }
-                      )
-                  )],
+                          child: PageView.builder(
+                            scrollDirection: Axis.vertical,
+                              // controller: _controller,
+                              itemCount: recipes!.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  color: Colors.white,
+                                  padding: cardPadding,
+                                  width: MediaQuery.of(context).size.width,
+                                  height: MediaQuery.of(context).size.height,
+                                  child: inProgressRecipeBuilder(
+                                      recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
+                                );
+                              }))
+                    ],
                   );
                 }
                 return const NoRecipes(text: "No In Progress Recipes");
@@ -92,5 +95,4 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
       return filter(recipes);
     }
   }
-
 }

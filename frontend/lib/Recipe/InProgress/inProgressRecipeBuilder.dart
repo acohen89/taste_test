@@ -22,6 +22,7 @@ class inProgressRecipeBuilder extends StatefulWidget {
 }
 
 class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
+  final _cardController = PageController(); 
   List<Recipe>? recipeIterations;
   late Future<List<Recipe>?> recsReturn;
   @override
@@ -52,17 +53,13 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
             child: Row(
               children: [
                 Expanded(
-                  child: ListView.separated(
+                  child: PageView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: recps.length,
                       itemBuilder: (context, index) {
                         return inProgressRecipeCard(horizontalCardPadding: widget.horizontalCardPadding, recipe: recps[index],);
                       },
-                      separatorBuilder: (context, index) {
-                        return const VerticalDivider(
-                          thickness: 20,
-                        );
-                      }),
+                      ),
                 ),
               ],
             ),
