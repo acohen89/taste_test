@@ -30,9 +30,13 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
   @override
   Widget build(BuildContext context) {
     final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
-    const double verticalPadding = 24.0;
-    final cardPadding =
-        EdgeInsets.only(top: verticalPadding , bottom: verticalPadding-4, left: horizontalCardPadding, right: horizontalCardPadding);
+    const double horizontalPageIndicatorPadding = 8; 
+    const double dotSize = 4; 
+    const double verticalPadding = dotSize + (horizontalPageIndicatorPadding * 2); 
+    const double topPadding = 32;
+    const double verticalPageIndicatorPadding = (topPadding-dotSize)/2; 
+    const cardPadding =
+        EdgeInsets.only(top: topPadding, bottom:0 , left: 0, right: verticalPadding);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -45,7 +49,6 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const SpinKitWave(color: lightBlue, size: 50);
                 }
-                //TODO: Show dots on side of the screen idicating how many recipes there are
                 var nullOrEmpty = snapshot.data != null ? snapshot.data!.isEmpty : true;
                 if (!nullOrEmpty) {
                   List<Recipe>? recipes = snapshot.data;
@@ -55,12 +58,12 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                     child: Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.only(left: horizontalPageIndicatorPadding, right: horizontalPageIndicatorPadding),
                           child: SmoothPageIndicator(
                             controller: _controller,
                             count: recipes!.length,
                             axisDirection: Axis.vertical,
-                            effect: const WormEffect(dotWidth: 4,  dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
+                            effect: const WormEffect(dotWidth: dotSize,  dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
                           ),
                         ),
                         Expanded(
@@ -75,6 +78,8 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                                     width: MediaQuery.of(context).size.width,
                                     height: MediaQuery.of(context).size.height,
                                     child: inProgressRecipeBuilder(
+                                        dotHeight: verticalPageIndicatorPadding,
+                                        dotSize: dotSize, 
                                         recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
                                   );
                                 })),

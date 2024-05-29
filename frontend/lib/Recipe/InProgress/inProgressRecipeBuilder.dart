@@ -14,8 +14,10 @@ import 'package:taste_test/Shared/globalFunctions.dart';
 class inProgressRecipeBuilder extends StatefulWidget {
   final Recipe recipe;
   final double horizontalCardPadding;
+  final double dotHeight;
+  final double dotSize;
 
-  const inProgressRecipeBuilder({super.key, required this.recipe, required this.horizontalCardPadding});
+  const inProgressRecipeBuilder({super.key, required this.dotHeight, required this.dotSize, required this.recipe, required this.horizontalCardPadding});
 
   @override
   State<inProgressRecipeBuilder> createState() => _inProgressRecipeBuilderState();
@@ -73,11 +75,11 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                 ),
               ),
                Padding(
-                 padding: const EdgeInsets.only(top:4.0),
+                 padding: EdgeInsets.symmetric(vertical: widget.dotHeight),
                  child: SmoothPageIndicator(
                   controller: _controller,
                   count: recps.length,
-                  effect: const WormEffect(dotWidth: 4, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
+                  effect: WormEffect(dotWidth: widget.dotSize, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
                                ),
                ),
             ],
