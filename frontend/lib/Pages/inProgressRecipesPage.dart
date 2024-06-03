@@ -66,13 +66,13 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                             effect: const WormEffect(dotWidth: dotSize,  dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
                           ),
                         ),
-                        Expanded(
+                            Expanded(
                             child: PageView.builder(
                                 scrollDirection: Axis.vertical,
                                 controller: _controller,
-                                itemCount: recipes!.length,
+                                itemCount: recipes!.length, 
                                 itemBuilder: (context, index) {
-                                  return Container(
+                                  return  Container(
                                     color: Colors.white,
                                     padding: cardPadding,
                                     width: MediaQuery.of(context).size.width,
@@ -97,11 +97,11 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
+  List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
+  
   Future<List<Recipe>?> loadMainRecipes() async {
-    List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? strRecipes = prefs.getStringList("recipes");
-    strRecipes = null;
     if (strRecipes == null) {
       String? token = prefs.getString("token");
       if (token == null) throw Exception("Null token");

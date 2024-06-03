@@ -20,31 +20,34 @@ class inProgressRecipeCard extends StatefulWidget {
 class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             Title(),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-            Ingredients(context),
-            const SizedBox(height: 8),
-            const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-             Procedure(context),
-            const SizedBox(height: 8),
-            const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-            widget.recipe.notes == null ? 
-            const Text("none", style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),) 
-            : Text(widget.recipe.notes!, maxLines: null,),
-
-
-          ],
+    return GestureDetector(
+      onTap: () => print(widget.recipe.id),
+      child: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               Title(),
+              const Divider(),
+              const SizedBox(height: 8),
+              const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+              Ingredients(context),
+              const SizedBox(height: 8),
+              const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+               Procedure(context),
+              const SizedBox(height: 8),
+              const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+              widget.recipe.notes == null ? 
+              const Text("none", style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),) 
+              : Text(widget.recipe.notes!, maxLines: null,),
+      
+      
+            ],
+          ),
         ),
       ),
     );

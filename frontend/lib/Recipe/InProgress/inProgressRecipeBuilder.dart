@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:taste_test/Pages/createRecipe.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
@@ -61,9 +62,11 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                         child: PageView.builder(
                           controller: _controller,
                           scrollDirection: Axis.horizontal,
-                          itemCount: recps.length,
+                          itemCount: recps.length + 1,
                           itemBuilder: (context, index) {
-                            return inProgressRecipeCard(
+                            return index == recps.length ? 
+                            AddIteration(recps[index-1])
+                            : inProgressRecipeCard(
                               horizontalCardPadding: widget.horizontalCardPadding,
                               recipe: recps[index],
                             );
@@ -78,13 +81,34 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                  padding: EdgeInsets.symmetric(vertical: widget.dotHeight),
                  child: SmoothPageIndicator(
                   controller: _controller,
-                  count: recps.length,
+                  count: recps.length + 1,
                   effect: WormEffect(dotWidth: widget.dotSize, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
                                ),
                ),
             ],
           );
         });
+  }
+
+  Container AddIteration(Recipe r) {
+    return  Container(
+      // color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.18, vertical:  MediaQuery.of(context).size.height * 0.38),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+           side: const BorderSide(width: 2.0, color: lightBlue), 
+           shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0), 
+            )        ),
+        onPressed: () {
+          Navigator.push(context,   MaterialPageRoute(
+            builder: (context) => CreateRecipe(isIteration: true,
+              id: r.id,
+             title: r.title, parentRID: r.parentRID, ingredientList: [for(var i in r.ingredients) i.toString()], procedureList: [for(var p in r.procedure) p.toString()], notes: r.notes
+             )));
+        }, child: 
+        Text("Add a new iteration")),
+    ); 
   }
 
   Future<List<Recipe>?> loadRecipeIterations(int id) async {
