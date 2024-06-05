@@ -70,8 +70,8 @@ def get_recipe_iterations(request):
     if not Recipe.objects.filter(pk=id).exists(): 
         return Response({"message": "Recipe ID not found"}, status=status.HTTP_404_NOT_FOUND) 
     recipe = Recipe.objects.get(pk=id)
-    if not recipe.iteration_ids.exists() or not recipe.beginningRecipe:
-        return Response({"Message":f"Iteration ids does not exist or beginningRecipe is {recipe.beginningRecipe}"},status=status.HTTP_404_NOT_FOUND)
+    if not recipe.beginningRecipe:
+        return Response({"Message":f"beginningRecipe is {recipe.beginningRecipe}"},status=status.HTTP_404_NOT_FOUND)
     iterations = [RecipeSerializer(r).data for r in recipe.iteration_ids.all()]
     return Response({"iterations": iterations}, status=status.HTTP_202_ACCEPTED)
 
@@ -84,6 +84,16 @@ def delete_recipe(request):
     r = Recipe.objects.filter(pk=request.data['id'])
     r.delete()
     return Response({"message": f"Deleted recipe with id {request.data['id']}"}, status=status.HTTP_202_ACCEPTED)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+def delete_all_user_recipes(request):
+    recipes =  UserRecipes.objects.get(pk=request.user.pk).recipesId.all()
+    for r in recipes:
+        r.delete()
+    return Response({"message": f"Deleted All user recipes "}, status=status.HTTP_202_ACCEPTED)
+    
 
 
 

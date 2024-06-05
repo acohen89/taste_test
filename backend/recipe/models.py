@@ -20,7 +20,7 @@ class Recipe(models.Model):
     parentRID = models.ForeignKey("self", null=True, on_delete=models.CASCADE, related_name="child_recipes")
     created = models.DateTimeField(auto_now_add=True)
     last_edited = models.DateTimeField(auto_now=True)  # Change `auto_now_add` to `auto_now`
-    ingredients = ArrayField(models.CharField(max_length=75))
+    ingredients = ArrayField(models.CharField(max_length=115))
     image_url = models.URLField(null=True)
     procedure = ArrayField(models.CharField(max_length=75))
     notes = models.TextField(null=True)
