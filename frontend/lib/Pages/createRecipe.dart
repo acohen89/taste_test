@@ -1,16 +1,38 @@
+import "dart:convert";
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import "package:http/http.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:taste_test/Components/BottomNavBar.dart";
+import "package:taste_test/Ingredient/IngredientClass.dart";
+import "package:taste_test/Pages/inProgressRecipesPage.dart";
+import "package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart";
 import "package:taste_test/Shared/apiCalls.dart";
 import "package:taste_test/Shared/constants.dart";
-import "package:taste_test/Ingredient/IngredientClass.dart";
+import "package:taste_test/Ingredient/IngredientRow.dart";
 import "package:taste_test/Pages/home.dart";
 import "package:taste_test/Shared/globalFunctions.dart";
 
-
 class CreateRecipe extends StatefulWidget {
-  const CreateRecipe({super.key});
+  final bool isIteration;
+  final int? parentRID;
+  final int? id;
+  final String? title;
+  final List<String>? ingredientList;
+  final List<String>? procedureList;
+  final String? notes;
+
+  const CreateRecipe({
+    super.key,
+    this.isIteration = false,
+    this.parentRID,
+    this.id,
+    this.title,
+    this.ingredientList,
+    this.procedureList,
+    this.notes,
+  });
 
   @override
   State<CreateRecipe> createState() => _CreateRecipeState();
@@ -20,14 +42,30 @@ class _CreateRecipeState extends State<CreateRecipe> {
   String missingInputText = "";
   List<String> procedureList = [];
   List<String> ingredientWidgets = ["One"];
-  List<Ingredient> ingredientsAddedController = [];
+  List<Ingredient?> ingredientsAddedController = [];
   Unit? unitController;
-  final ingredientsController = TextEditingController();
-  final procedureController = TextEditingController();
-  final quantityController = TextEditingController();
-  final titleController = TextEditingController();
-  final notesController = TextEditingController();
+  late TextEditingController ingredientsController;
+  late TextEditingController procedureController;
+  late TextEditingController quantityController;
+  late TextEditingController titleController;
+  late TextEditingController notesController;
   bool waitingForApiCallBack = false;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController(text: widget.title);
+    notesController = TextEditingController(text: widget.notes);
+    ingredientsController = TextEditingController();
+    quantityController = TextEditingController();
+    procedureController = TextEditingController();
+    ingredientsAddedController = [];
+    if (widget.ingredientList != null) {
+      ingredientsAddedController = [for (var i in widget.ingredientList!) Ingredient.fromString(i)];
+    }
+    procedureList = widget.procedureList ?? [];
+  }
+
   @override
   Widget build(BuildContext context) {
     const double titleSpace = 24;
@@ -42,42 +80,23 @@ class _CreateRecipeState extends State<CreateRecipe> {
       color: lightBlue,
     );
     const double inputBoxRadius = 12;
-
+    final bool isIter = widget.isIteration;
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("New Recipe"),
+          title: Text(isIter ? "New Iteration" : "New Recipe"),
         ),
         body: Container(
-          padding: const EdgeInsets.only(
-              left: edgePadding,
-              right: edgePadding,
-              bottom: bottomPadding,
-              top: topPadding
-              ),
+          padding: const EdgeInsets.only(left: edgePadding, right: edgePadding, bottom: bottomPadding, top: topPadding),
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // const SizedBox(height: titleSpace),
                 const Row(
                   children: [
                     Text("Title", style: headingStyle),
                   ],
                 ),
-                TextField(
-                  textAlignVertical: TextAlignVertical.bottom,
-                  maxLines: null,
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.title),
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(inputBoxRadius),
-                      borderSide: const BorderSide(color: greyColor),
-                    ),
-                    hintText: 'enter recipe title',
-                  ),
-                ),
+                TitleTextField(inputBoxRadius),
                 const SizedBox(height: titleSpace),
                 const Row(
                   children: [
@@ -91,12 +110,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             itemCount: ingredientsAddedController.length,
                             itemBuilder: (BuildContext context, int index) {
                               return AddedIngredient(
-                                  unit: ingredientsAddedController[index].unit,
-                                  food: ingredientsAddedController[index].food,
-                                  quantity: ingredientsAddedController[index]
-                                      .quantity,
-                                  deleteFunction:
-                                      deleteIFromIngredientsAddedController,
+                                  unit: ingredientsAddedController[index]?.unit,
+                                  food: ingredientsAddedController[index]!.food,
+                                  quantity: ingredientsAddedController[index]?.quantity,
+                                  deleteFunction: deleteIFromIngredientsAddedController,
                                   index: index);
                             }),
                       )
@@ -105,58 +122,15 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   children: [
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.15,
-                      child: TextField(
-                        textAlignVertical: TextAlignVertical.bottom,
-                        textAlign: TextAlign.right,
-                        controller: quantityController,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.only(
-                              right: 10, top: 10, bottom: 0),
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(ingredientInputRadius),
-                            borderSide:
-                                const BorderSide(color: greyColor),
-                          ),
-                          hintText: '',
-                        ),
-                      ),
+                      child: QuantityTextField(ingredientInputRadius),
                     ),
-                    DropdownButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      value: unitController,
-                      onChanged: (newValue) {
-                        setState(() {
-                          unitController = newValue;
-                        });
-                      },
-                      items: Unit.values.map((Unit classType) {
-                        return DropdownMenuItem<Unit>(
-                            value: classType, child: Text(classType.name));
-                      }).toList(),
-                    ),
+                    UnitDropDown(),
                     Expanded(
-                      child: TextField(
-                        textAlignVertical: TextAlignVertical.bottom,
-                        controller: ingredientsController,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.all(8),
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(ingredientInputRadius),
-                            borderSide:
-                                const BorderSide(color: greyColor),
-                          ),
-                          hintText: '',
-                        ),
-                      ),
+                      child: IngredientTextField(ingredientInputRadius),
                     ),
                     IconButton(
                         onPressed: () {
-                          String errorText(String e) =>
-                              "Please add $e before adding the ingredient";
+                          String errorText(String e) => "Please add $e before adding the ingredient";
                           if (quantityController.text.isEmpty) {
                             errorPopUp(errorText("a quantity"));
                             return;
@@ -190,7 +164,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 ),
                 procedureList.isNotEmpty
                     ? ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: procedureList.length,
                         itemBuilder: (BuildContext context, int index) {
@@ -200,9 +174,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 children: [
                                   Container(
                                       padding: const EdgeInsets.only(right: 15),
-                                      child: Text('${index + 1}.',
-                                          style:
-                                              const TextStyle(fontSize: 18))),
+                                      child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
                                   Expanded(
                                     child: Text(
                                       procedureList[index],
@@ -210,8 +182,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                     ),
                                   ),
                                   IconButton(
-                                      onPressed: () => setState(
-                                          () => procedureList.removeAt(index)),
+                                      onPressed: () => setState(() => procedureList.removeAt(index)),
                                       icon: const Icon(Icons.delete))
                                 ],
                               ),
@@ -224,24 +195,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                        width: 30,
-                        child: Text('${procedureList.length + 1}.',
-                            style: const TextStyle(fontSize: 20))),
-                    Expanded(
-                        child: TextField(
-                            textAlignVertical: TextAlignVertical.bottom,
-                            decoration: const InputDecoration(
-                                hintText:
-                                    "enter the steps you took to create this recipe",
-                                hintStyle: TextStyle(fontSize: 10)),
-                            minLines: procedureMinLines,
-                            maxLines: procedureMaxLines,
-                            controller: procedureController)),
+                        width: 30, child: Text('${procedureList.length + 1}.', style: const TextStyle(fontSize: 20))),
+                    Expanded(child: ProcedureTextField(procedureMinLines, procedureMaxLines)),
                     IconButton(
                         onPressed: () {
                           if (procedureController.text.isEmpty) {
-                            errorPopUp(
-                                "Please edit to procedure field before adding");
+                            errorPopUp("Please edit to procedure field before adding");
                             return;
                           }
                           setState(() {
@@ -258,20 +217,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     Text("Notes", style: headingStyle),
                   ],
                 ),
-                TextField(
-                  textAlignVertical: TextAlignVertical.bottom,
-                  maxLines: null,
-                  controller: notesController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.notes),
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(inputBoxRadius),
-                      borderSide: const BorderSide(color: greyColor),
-                    ),
-                    hintText: 'any notes on this recipe',
-                  ),
-                ),
+                NotesTextField(inputBoxRadius),
                 const SizedBox(height: titleSpace),
                 waitingForApiCallBack
                     ? const SpinKitWave(color: lightBlue, size: 50)
@@ -282,8 +228,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               textStyle: const TextStyle(fontSize: 16),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(
-                                      color: lightBlue, width: 1)),
+                                  side: const BorderSide(color: lightBlue, width: 1)),
                             ),
                             onPressed: () async {
                               if (titleController.text.isEmpty) {
@@ -291,55 +236,154 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 return;
                               }
                               if (ingredientsAddedController.isEmpty) {
-                                errorPopUp(
-                                    "Please add at least one ingredient");
+                                errorPopUp("Please add at least one ingredient");
                                 return;
                               }
                               if (procedureList.isEmpty) {
-                                errorPopUp(
-                                    "Please add at least one step to the procedure");
+                                errorPopUp("Please add at least one step to the procedure");
                                 return;
                               }
 
-                              final prefs =
-                                  await SharedPreferences.getInstance();
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();
                               final String? key = prefs.getString("token");
-                              if (key == null)
-                                throw ("Unable to get auth token");
+                              if (key == null) throw ("Unable to get auth token");
                               setState(() => waitingForApiCallBack = true);
                               final List<String> ingredientList =
-                                  ingredientsAddedController
-                                      .map((i) => i.toString())
-                                      .toList();
+                                  ingredientsAddedController.map((i) => i.toString()).toList();
                               var res = await createRecipe(
-                                  key,
-                                  titleController.text,
-                                  ingredientList,
-                                  procedureList,
-                                  notesController.text);
+                                  key, titleController.text, ingredientList, procedureList, notesController.text,
+                                  parentRID: widget.parentRID);
                               setState(() => waitingForApiCallBack = false);
                               if (res.statusCode >= 300) {
                                 errorPopUp("Error creating recipe");
                                 return;
                               }
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Home()));
+                              if (widget.isIteration) {
+                                addRecipeToPrefs(res, prefs, widget.parentRID ?? widget.id);
+                                Navigator.push(
+                                    context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
+                                    return; 
+                              }
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const Home()));
                             },
                             child: const Text(
                               "Create Recipe",
-                              style: TextStyle(
-                                  color: lightBlue,
-                                  fontWeight: FontWeight.bold),
+                              style: TextStyle(color: lightBlue, fontWeight: FontWeight.bold),
                             )),
                       )
               ],
             ),
           ),
         ),
-      bottomNavigationBar:  const BottomNavBar(startIndex: 1)
-        );
+        bottomNavigationBar: const BottomNavBar(startIndex: 1));
+  }
+
+  void addRecipeToPrefs(Response res, SharedPreferences sp, int? recId) {
+    if(recId == null) throw Exception("Cannot create recipe because id is null");
+    String id = recId.toString(); 
+    try {
+      if (sp.containsKey(id)) {
+        List<String>? recStrList = sp.getStringList(id);
+        recStrList!.add(res.body);
+        sp.setStringList(id, recStrList);
+      } else {
+        sp.setStringList(id, [res.body]);
+      }
+    } catch (e) {
+      throw Exception("$e, trying to addRecipeToPrefs");
+    }
+  }
+
+  TextField NotesTextField(double inputBoxRadius) {
+    return TextField(
+      textAlignVertical: TextAlignVertical.bottom,
+      maxLines: null,
+      controller: notesController,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.notes),
+        isDense: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(inputBoxRadius),
+          borderSide: const BorderSide(color: greyColor),
+        ),
+        hintText: 'any notes on this recipe',
+      ),
+    );
+  }
+
+  TextField ProcedureTextField(int procedureMinLines, int procedureMaxLines) {
+    return TextField(
+        textAlignVertical: TextAlignVertical.bottom,
+        decoration: const InputDecoration(
+            hintText: "enter the steps you took to create this recipe", hintStyle: TextStyle(fontSize: 10)),
+        minLines: procedureMinLines,
+        maxLines: procedureMaxLines,
+        controller: procedureController);
+  }
+
+  TextField IngredientTextField(double ingredientInputRadius) {
+    return TextField(
+      textAlignVertical: TextAlignVertical.bottom,
+      controller: ingredientsController,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: const EdgeInsets.all(8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ingredientInputRadius),
+          borderSide: const BorderSide(color: greyColor),
+        ),
+        hintText: '',
+      ),
+    );
+  }
+
+  DropdownButton<Unit> UnitDropDown() {
+    return DropdownButton(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      value: unitController,
+      onChanged: (newValue) {
+        setState(() {
+          unitController = newValue;
+        });
+      },
+      items: Unit.values.map((Unit classType) {
+        return DropdownMenuItem<Unit>(value: classType, child: Text(classType.name));
+      }).toList(),
+    );
+  }
+
+  TextField QuantityTextField(double ingredientInputRadius) {
+    return TextField(
+      textAlignVertical: TextAlignVertical.bottom,
+      textAlign: TextAlign.right,
+      controller: quantityController,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: const EdgeInsets.only(right: 10, top: 10, bottom: 0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ingredientInputRadius),
+          borderSide: const BorderSide(color: greyColor),
+        ),
+        hintText: '',
+      ),
+    );
+  }
+
+  TextFormField TitleTextField(double inputBoxRadius) {
+    return TextFormField(
+      textAlignVertical: TextAlignVertical.bottom,
+      maxLines: null,
+      controller: titleController,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.title),
+        isDense: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(inputBoxRadius),
+          borderSide: const BorderSide(color: greyColor),
+        ),
+        hintText: 'enter recipe title',
+      ),
+    );
   }
 
   void deleteIFromIngredientsAddedController(int index) {
@@ -358,17 +402,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
   }
 
   void addIngredient() {
-    if (ingredientsController.text.isEmpty ||
-        quantityController.text.isEmpty ||
-        unitController == null) {
+    if (ingredientsController.text.isEmpty || quantityController.text.isEmpty || unitController == null) {
       return;
     }
     double? q = double.tryParse(quantityController.text);
     if (q == null) {
       return;
     }
-    final Ingredient i =
-        Ingredient(q, unitController!, ingredientsController.text);
+    final Ingredient i = Ingredient(q, unitController!, ingredientsController.text);
     setState(() {
       ingredientsAddedController.add(i);
       quantityController.text = "";

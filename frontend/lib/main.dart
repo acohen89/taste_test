@@ -3,7 +3,7 @@ import 'package:taste_test/Pages/home.dart';
 import 'package:taste_test/Pages/settings.dart';
 import 'package:taste_test/Pages/inProgressRecipesPage.dart';
 import 'package:taste_test/Pages/login.dart';
-import 'package:taste_test/Recipe/createRecipe.dart';
+import 'package:taste_test/Pages/createRecipe.dart';
 import 'package:taste_test/signUp.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
