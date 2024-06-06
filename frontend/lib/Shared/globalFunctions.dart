@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,61 @@ Future<List<Recipe>?> getRecipesAndSetPrefs(
     return null;
   }
 }
+
+Future<bool> confirmDelete(BuildContext context, String title) {
+  final Completer<bool> completer = Completer<bool>();
+  final yesButtonStyle = OutlinedButton.styleFrom(
+    backgroundColor: lightBlue,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(4),
+    ),
+  );
+  final noButtonStyle = OutlinedButton.styleFrom(
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4), side: const BorderSide(color: lightBlue, width: 1.2)),
+  );
+
+  final snack = SnackBar(
+    content: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          "Are you sure you want to delete $title?",
+          style: const TextStyle(color: Colors.black),
+          maxLines: 2,
+          overflow: TextOverflow.clip,
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+              style: yesButtonStyle,
+              onPressed: () {
+                completer.complete(true);
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+              child: const Text("Yes", style: TextStyle(color: Colors.white))),
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: TextButton(
+              style: noButtonStyle,
+              onPressed: () {
+                completer.complete(false);
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+              child: const Text("No")),
+        ),
+      ],
+    ),
+    duration: const Duration(seconds: 99999999999),
+    backgroundColor: Colors.white,
+    elevation: 20,
+    behavior: SnackBarBehavior.floating,
+  );
+  ScaffoldMessenger.of(context).showSnackBar(snack);
+  return completer.future;
+}
+
 
 Future<void> setPrefs(String responseBody, SharedPreferences prefs) async {
   List<String> strRecipes = [

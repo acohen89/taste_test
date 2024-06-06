@@ -17,11 +17,12 @@ Future<http.Response> deleteRecipe(String token, String id) async {
 }
 
 Future<http.Response> createRecipe(String token, String title,
-    List<String> ingredients, List<String> procedure, String notes, {int? parentRID}) async {
+    List<String> ingredients, List<String> procedure, String notes, bool beginningRecipe,
+    {int? parentRID}  ) async {
   final body = jsonEncode(<String, dynamic>{
     "title": title,
     "parentRID": parentRID,
-    "beginningRecipe": true,
+    "beginningRecipe": beginningRecipe,
     "created": DateTime.now().toString(),
     "last_edited": DateTime.now().toString(),
     "ingredients": ingredients,

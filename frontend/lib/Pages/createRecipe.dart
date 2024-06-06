@@ -251,7 +251,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               final List<String> ingredientList =
                                   ingredientsAddedController.map((i) => i.toString()).toList();
                               var res = await createRecipe(
-                                  key, titleController.text, ingredientList, procedureList, notesController.text,
+                                  key, titleController.text, ingredientList, procedureList, notesController.text, !widget.isIteration,
                                   parentRID: widget.parentRID);
                               setState(() => waitingForApiCallBack = false);
                               if (res.statusCode >= 300) {
