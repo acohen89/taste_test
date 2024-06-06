@@ -55,7 +55,8 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
             children: [
               Expanded(
                 child: Card(
-                  elevation: 20,
+                  color: Colors.transparent,
+                  elevation: 15,
                   child: Column(
                     children: [
                       Expanded(
