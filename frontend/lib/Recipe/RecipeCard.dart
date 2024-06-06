@@ -63,7 +63,7 @@ class _RecipeCardState extends State<RecipeCard> {
       const SpinKitCubeGrid(color: lightBlue, size: 200);
 
   final dt = DateFormat('h:mm a M-d');
-  final lastEditedTexStyle = const TextStyle(fontSize: 11);
+  final lastEditedTexStyle = const TextStyle(fontSize: 11, fontStyle: FontStyle.italic);
 
   static const double cardElevation = 8;
   bool deletingRecipe = false;

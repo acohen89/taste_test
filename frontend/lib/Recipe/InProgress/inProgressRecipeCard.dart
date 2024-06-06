@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/constants.dart';
 
@@ -22,35 +23,59 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => print(widget.recipe.id),
-      child: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-               Title(),
-              const Divider(),
-              const SizedBox(height: 8),
-              const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-              Ingredients(context),
-              const SizedBox(height: 8),
-              const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-               Procedure(context),
-              const SizedBox(height: 8),
-              const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-              widget.recipe.notes == null ? 
-              const Text("none", style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),) 
-              : Text(widget.recipe.notes!, maxLines: null,),
-      
-      
-            ],
+      child: Column(
+        children: [
+          Flexible(
+            flex: 42,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                     Title(),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                    Ingredients(context),
+                    const SizedBox(height: 8),
+                    const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                     Procedure(context),
+                    const SizedBox(height: 8),
+                    const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                    widget.recipe.notes == null ? 
+                    const Text("none", style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),) 
+                    : Text(widget.recipe.notes!, maxLines: null,),
+            
+            
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+          Flexible(
+            flex: 1,
+            child: LastEdited())
+        ],
       ),
     );
+  }
+
+  Container LastEdited() {
+    return Container(
+            color: Colors.white,
+            padding: const EdgeInsets.only(right: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text("Edited ${DateFormat('h:mma M/d').format(DateTime.parse(widget.recipe.last_edited))}",
+                  style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic)),
+              ],
+            ),
+          );
   }
 
   Column Procedure(BuildContext context) {
