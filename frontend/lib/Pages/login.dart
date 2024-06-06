@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
+import 'package:path_provider/path_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,10 +15,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  @override
-  Widget build(BuildContext context) {
+  bool showPassword = false; 
     final usernameController = TextEditingController();
     final passwordController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
     @override
     void dispose() {
       // Clean up the controller when the widget is disposed.
@@ -26,9 +29,11 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
-        body: Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width * 0.08),
+        body: Stack(
+      children: [
+        Image.asset('Assets/Logo.PNG'),
+        Container(
+            padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.08),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -53,19 +58,22 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         isDense: true,
                         prefixIcon: const Icon(Icons.person),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14.0)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.0)),
                         hintText: 'Username',
                       ),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                     TextField(
+                      obscureText: showPassword,
                       controller: passwordController,
                       decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                        onPressed: () => setState(() => showPassword = !showPassword), 
+                        icon:  Icon(showPassword ? Icons.visibility : Icons.visibility_off), 
+                        ),
                         prefixIcon: const Icon(Icons.password),
                         isDense: true,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14.0)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.0)),
                         hintText: 'Password',
                       ),
                     ),
@@ -81,26 +89,23 @@ class _LoginPageState extends State<LoginPage> {
                             showDialog(
                                 context: context,
                                 builder: (context) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
+                                  return const Center(child: CircularProgressIndicator());
                                 });
-                            Response res = await login(usernameController.text,
-                                passwordController.text);
+                            Response res = await login(usernameController.text, passwordController.text);
                             Navigator.of(context).pop();
-                              if (res.statusCode < 300) {
-                                setPrefs(res.body);
-                                Navigator.of(context).pushNamed("home"); 
-                                return; 
-                              }
-                              if(res.statusCode == 404){
-                                loginErrorPopUp(
-                                    "Username or password does not match");
-                                return; 
-                              } if(res.statusCode >= 500){
-                                loginErrorPopUp(
-                                    "Error logging in, please try again later");
-                                return;
-                              }
+                            if (res.statusCode < 300) {
+                              setPrefs(res.body);
+                              Navigator.of(context).pushNamed("home");
+                              return;
+                            }
+                            if (res.statusCode == 404) {
+                              loginErrorPopUp("Username or password does not match");
+                              return;
+                            }
+                            if (res.statusCode >= 500) {
+                              loginErrorPopUp("Error logging in, please try again later");
+                              return;
+                            }
                           },
                           child: const Text("Login")),
                     ),
@@ -118,7 +123,9 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ],
-            )));
+            )),
+      ],
+    ));
   }
 
   void setPrefs(String res) async {
@@ -132,8 +139,9 @@ class _LoginPageState extends State<LoginPage> {
     prefs.setString('email', body["user"]["email"]);
   }
 
-  void loginErrorPopUp(String text, {int duration=2250}) {
+  void loginErrorPopUp(String text, {int duration = 2250}) {
     final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
+
 }
