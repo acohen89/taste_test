@@ -94,7 +94,6 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
 
   Container AddIteration(Recipe r) {
     return  Container(
-      // color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.18, vertical:  MediaQuery.of(context).size.height * 0.38),
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
@@ -126,7 +125,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     }
     try {
       final List<String> strRecipes = [for (var r in jsonDecode(response.body)["iterations"]) jsonEncode(r)];
-      sp.setStringList(id.toString(), strRecipes);
+      sp.setStringList("${id.toString()} iterations", strRecipes);
       return Recipe.stringsToRecipes(strRecipes);
     } catch (e) {
       throw Exception("$e, could not parse iterations body");
@@ -134,7 +133,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
   }
 
   List<Recipe>? getRecipeFromPrefs(int id, SharedPreferences prefs) {
-    List<String>? recipeFromPrefs = prefs.getStringList(id.toString());
+    List<String>? recipeFromPrefs = prefs.getStringList("${id.toString()} iterations");
     if (recipeFromPrefs == null) return null;
     return Recipe.stringsToRecipes(recipeFromPrefs);
   }

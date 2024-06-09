@@ -250,19 +250,21 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               setState(() => waitingForApiCallBack = true);
                               final List<String> ingredientList =
                                   ingredientsAddedController.map((i) => i.toString()).toList();
-                              var res = await createRecipe(
-                                  key, titleController.text, ingredientList, procedureList, notesController.text, !widget.isIteration,
-                                  parentRID: widget.parentRID);
+                              var res = await createRecipe(key, titleController.text, ingredientList, procedureList,
+                                  notesController.text, !widget.isIteration,
+                                  parentRID: widget.parentRID  ?? widget.id);
                               setState(() => waitingForApiCallBack = false);
                               if (res.statusCode >= 300) {
                                 errorPopUp("Error creating recipe");
                                 return;
                               }
+                              //if parentid is null we know that it's a beginning recipe
+                              bool beginningRecipe = (widget.parentRID == null && widget.id == null) ? true : false;
+                              addRecipeToPrefs(res, prefs, beginningRecipe, widget.parentRID ?? widget.id);
                               if (widget.isIteration) {
-                                addRecipeToPrefs(res, prefs, widget.parentRID ?? widget.id);
                                 Navigator.push(
                                     context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
-                                    return; 
+                                return;
                               }
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const Home()));
                             },
@@ -278,16 +280,21 @@ class _CreateRecipeState extends State<CreateRecipe> {
         bottomNavigationBar: const BottomNavBar(startIndex: 1));
   }
 
-  void addRecipeToPrefs(Response res, SharedPreferences sp, int? recId) {
-    if(recId == null) throw Exception("Cannot create recipe because id is null");
-    String id = recId.toString(); 
+  void addRecipeToPrefs(Response res, SharedPreferences sp, bool beginningRecipe, int? recId) {
+    if (recId == null) throw Exception("Cannot create recipe because id is null");
+    String id = recId.toString();
     try {
-      if (sp.containsKey(id)) {
-        List<String>? recStrList = sp.getStringList(id);
+      if (beginningRecipe) {
+        List<String> ids = sp.getStringList("recipeIDList") ?? [];
+        ids.add(id);
+        sp.setStringList("recipeIDList", ids);
+        sp.setString(id, res.body);
+      } else if (sp.containsKey("$id iterations")) {
+        var recStrList = sp.getStringList("$id iterations");
         recStrList!.add(res.body);
-        sp.setStringList(id, recStrList);
+        sp.setStringList("$id iterations", recStrList);
       } else {
-        sp.setStringList(id, [res.body]);
+        sp.setStringList("$id iterations", [res.body]);
       }
     } catch (e) {
       throw Exception("$e, trying to addRecipeToPrefs");

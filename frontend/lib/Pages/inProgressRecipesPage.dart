@@ -97,21 +97,13 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
-  List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
+
   
   Future<List<Recipe>?> loadMainRecipes() async {
+    List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? strRecipes = prefs.getStringList("recipes");
-    if (strRecipes == null) {
-      String? token = prefs.getString("token");
-      if (token == null) throw Exception("Null token");
-      List<Recipe>? recipeReturn = await getRecipesAndSetPrefs(token, prefs, loadingError);
-      if (recipeReturn == null) throw Exception("Null recipes");
-      return filter(recipeReturn);
-    } else {
-      List<Recipe>? recipes = Recipe.stringsToRecipes(strRecipes);
-      if (recipes == null) throw Exception("Error converting string recipes to object");
-      return filter(recipes);
-    }
+    String? token = prefs.getString("token");
+    if(token == null) throw Exception("Null token");  
+    return getMainRecipes(filter, prefs, token, loadingError);
   }
 }

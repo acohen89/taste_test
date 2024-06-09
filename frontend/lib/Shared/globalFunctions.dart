@@ -18,10 +18,8 @@ Future<List<Recipe>?> getRecipesAndSetPrefs(
       loadingError("Error loading recipes");
       return null;
     }
-    var recipes = jsonDecode(response.body)
-        .map<Recipe>((r) => Recipe.fromJson(r))
-        .toList();
-    await setPrefs(response.body, prefs);
+    var recipes = jsonDecode(response.body).map<Recipe>((r) => Recipe.fromJson(r)).toList();
+    await setMainRecipePrefs(response.body, prefs);
     return recipes;
   } catch (e) {
     print(e);
@@ -84,12 +82,47 @@ Future<bool> confirmDelete(BuildContext context, String title) {
   return completer.future;
 }
 
+Future<List<Recipe>?> getMainRecipes(
+    Function filter, SharedPreferences prefs, String token, Function loadingError) async { 
+  List<String>? recipesFromPrefs = getMainRecipesFromPrefs(prefs);
+  recipesFromPrefs = null; 
+  List<Recipe>? result = (recipesFromPrefs == null || recipesFromPrefs.isEmpty)
+      ? await getRecipesAndSetPrefs(token, prefs, loadingError)
+      : Recipe.stringsToRecipes(recipesFromPrefs);
+  return filter(result);
+}
 
-Future<void> setPrefs(String responseBody, SharedPreferences prefs) async {
-  List<String> strRecipes = [
-    for (var r in jsonDecode(responseBody)) jsonEncode(r)
-  ];
-  prefs.setStringList("recipes", strRecipes);
+List<String>? getMainRecipesFromPrefs(SharedPreferences sp) {
+  List<String>? recipeIds = sp.getStringList("recipeIDList");
+  if (recipeIds == null || recipeIds.isEmpty) return recipeIds;
+  List<String>? strRecipes = [];
+  try {
+    for(int i = 0; i < recipeIds.length; i++){
+      var r = sp.getString(recipeIds[i]);
+      if(r == null) throw Exception("Recipe null"); 
+      strRecipes.add(r); 
+    }
+  } catch (e) {
+    print(e); 
+  }
+  if (strRecipes.isEmpty) print("No recipes");
+  return strRecipes;
+}
+
+Future<void> setMainRecipePrefs(String responseBody, SharedPreferences prefs) async {
+  try {
+    var resMap = jsonDecode(responseBody);
+    Map<String, dynamic> recipeIDs = {};
+    resMap.forEach((recipe) => recipeIDs[recipe["id"].toString()] = recipe);
+    List<String> idList = [];
+    recipeIDs.forEach((id, recipe) {
+      idList.add(id);
+      prefs.setString(id, jsonEncode(recipe));
+    });
+    prefs.setStringList("recipeIDList", idList);
+  } catch (e) {
+    throw Exception("$e, trying to set main recipe prefs");
+  }
 }
 
 SnackBar snackBarError(String text, int duration) {

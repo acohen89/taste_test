@@ -31,7 +31,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    recs = loadRecipes();
+    recs = loadMainRecipes();
   }
 
   @override
@@ -117,13 +117,12 @@ class _HomeState extends State<Home> {
         bottomNavigationBar: const BottomNavBar(startIndex: 2));
   }
 
-  Future<List<Recipe>?> loadRecipes() async {
+  Future<List<Recipe>?> loadMainRecipes() async {
+    List<Recipe>? filter(List<Recipe>? result) => result?.where((r) => r.in_progress == false).toList();
     await retrieveUserDetails();
     if (token == null) throw Exception("Null token");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String>? recipesFromPrefs = prefs.getStringList("recipes"); 
-    List<Recipe>? result = recipesFromPrefs == null ? await getRecipesAndSetPrefs(token!, prefs, loadingError) :  Recipe.stringsToRecipes(recipesFromPrefs); 
-    return result?.where((r) => r.in_progress == false).toList();
+    return await getMainRecipes(filter, prefs, token!, loadingError);
   }
 
   Future<void> retrieveUserDetails() async {
@@ -137,12 +136,7 @@ class _HomeState extends State<Home> {
 
   void deleteUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('token');
-    prefs.remove('id');
-    prefs.remove('username');
-    prefs.remove('first_name');
-    prefs.remove('last_name');
-    prefs.remove('email');
+    await prefs.clear(); 
   }
 
   void deleteInProgressOnIndex(int index) {
