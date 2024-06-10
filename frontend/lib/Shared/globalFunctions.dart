@@ -37,8 +37,7 @@ Future<bool> confirmDelete(BuildContext context, String title) {
     ),
   );
   final noButtonStyle = OutlinedButton.styleFrom(
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4), side: const BorderSide(color: lightBlue, width: 1.2)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4), side: const BorderSide(color: lightBlue, width: 1.2)),
   );
 
   final snack = SnackBar(
@@ -82,10 +81,9 @@ Future<bool> confirmDelete(BuildContext context, String title) {
   return completer.future;
 }
 
-Future<List<Recipe>?> getMainRecipes(
-    Function filter, SharedPreferences prefs, String token, Function loadingError) async { 
+Future<List<Recipe>?> getMainRecipes(Function filter, SharedPreferences prefs, String token, Function loadingError) async {
   List<String>? recipesFromPrefs = getMainRecipesFromPrefs(prefs);
-  recipesFromPrefs = null; 
+  recipesFromPrefs = null;
   List<Recipe>? result = (recipesFromPrefs == null || recipesFromPrefs.isEmpty)
       ? await getRecipesAndSetPrefs(token, prefs, loadingError)
       : Recipe.stringsToRecipes(recipesFromPrefs);
@@ -97,13 +95,13 @@ List<String>? getMainRecipesFromPrefs(SharedPreferences sp) {
   if (recipeIds == null || recipeIds.isEmpty) return recipeIds;
   List<String>? strRecipes = [];
   try {
-    for(int i = 0; i < recipeIds.length; i++){
+    for (int i = 0; i < recipeIds.length; i++) {
       var r = sp.getString(recipeIds[i]);
-      if(r == null) throw Exception("Recipe null"); 
-      strRecipes.add(r); 
+      if (r == null) throw Exception("Recipe null");
+      strRecipes.add(r);
     }
   } catch (e) {
-    print(e); 
+    print(e);
   }
   if (strRecipes.isEmpty) print("No recipes");
   return strRecipes;
@@ -137,4 +135,28 @@ SnackBar snackBarError(String text, int duration) {
     behavior: SnackBarBehavior.floating,
     margin: const EdgeInsets.all(4),
   );
+}
+
+void deleteIterationFromPrefs(SharedPreferences sp, String parentRID, String id) {
+  if (!sp.containsKey("$parentRID iterations")) throw Exception("sp does contain parentRID $parentRID, trying to deleteIterationFromPrefs");
+  List<String>? iterationList = sp.getStringList("$parentRID iterations");
+  if (iterationList == null) throw Exception("parentRID $parentRID iteration list is null, trying to deleteIterationFromPrefs");
+  bool removed = false;
+  for (String strRecipe in iterationList) {
+    var mapRecipe = jsonDecode(strRecipe);
+    if (mapRecipe["id"].toString() == id) {
+      iterationList.remove(strRecipe);
+      removed = true;
+      break;
+    }
+  }
+  if (!removed) throw Exception("Could not find $id in $parentRID list, trying to deleteIterationFromPrefs ");
+  sp.setStringList("$parentRID iterations", iterationList);
+}
+
+Future<void> deleteBeginningRecipeFromPrefs(SharedPreferences sp, String id) async {
+  if (!sp.containsKey("$id iterations")) throw Exception("sp does contain beginning $id iterations, trying to deleteBeginningRecipeFromPrefs");
+  if (!sp.containsKey(id)) throw Exception("sp does contain recipe $id, trying to deleteBeginningRecipeFromPrefs");
+  await sp.remove(id); 
+  await sp.remove("$id iterations"); 
 }

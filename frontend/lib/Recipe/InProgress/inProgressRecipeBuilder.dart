@@ -114,7 +114,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
 
   Future<List<Recipe>?> loadRecipeIterations(int id) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    List<Recipe>? recipesFromPrefs = getRecipeFromPrefs(id, sp);
+    List<Recipe>? recipesFromPrefs = getIterationRecipeFromPrefs(id, sp);
     if (recipesFromPrefs != null) return recipesFromPrefs;
     final String? token = sp.getString("token");
     if (token == null) throw Exception("Null token");
@@ -132,7 +132,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     }
   }
 
-  List<Recipe>? getRecipeFromPrefs(int id, SharedPreferences prefs) {
+  List<Recipe>? getIterationRecipeFromPrefs(int id, SharedPreferences prefs) {
     List<String>? recipeFromPrefs = prefs.getStringList("${id.toString()} iterations");
     if (recipeFromPrefs == null) return null;
     return Recipe.stringsToRecipes(recipeFromPrefs);

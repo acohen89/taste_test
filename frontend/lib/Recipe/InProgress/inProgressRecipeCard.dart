@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taste_test/Pages/inProgressRecipesPage.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
@@ -17,7 +18,6 @@ class inProgressRecipeCard extends StatefulWidget {
 
   final Recipe recipe;
   final double horizontalCardPadding;
-
   @override
   State<inProgressRecipeCard> createState() => _inProgressRecipeCardState();
 }
@@ -43,12 +43,10 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                     Title(),
                     const Divider(),
                     const SizedBox(height: 8),
-                    const Text("Ingredients",
-                        style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                    const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
                     Ingredients(context),
                     const SizedBox(height: 8),
-                    const Text("Procedure",
-                        style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                    const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
                     Procedure(context),
                     const SizedBox(height: 8),
                     const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
@@ -76,8 +74,7 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                   children: [
                     IconButton(
                         onPressed: () async {
-                          final String deleteText = widget.recipe.title +
-                              (widget.recipe.beginningRecipe ? " and all of it's iterations" : "");
+                          final String deleteText = widget.recipe.title + (widget.recipe.beginningRecipe ? " and all of it's iterations" : "");
                           bool delete = await confirmDelete(context, deleteText);
                           if (delete) {
                             SharedPreferences sp = await SharedPreferences.getInstance();
@@ -87,15 +84,14 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                             if (res.statusCode >= 300) {
                               return deleteRecipeErrorPopUp("Error deleting recipe", res.body);
                             } else {
-                              if(widget.recipe.beginningRecipe){
-                                
+                              if (widget.recipe.beginningRecipe) {
+                                await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString()); 
                               } else {
-
+                                deleteIterationFromPrefs(sp, widget.recipe.parentRID.toString(), widget.recipe.id.toString());
                               }
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
                             }
                           }
-                          // delete from shared prefs
-                          // deleteRecipeFromPrefs()
                         },
                         icon: const Icon(size: 18, Icons.delete)),
                     LastEdited(),
