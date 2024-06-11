@@ -81,6 +81,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
     );
     const double inputBoxRadius = 12;
     final bool isIter = widget.isIteration;
+    //if parentid is null we know that it's a beginning recipe
+    final bool beginningRecipe = (widget.parentRID == null && widget.id == null) ? true : false;
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -172,18 +174,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             children: [
                               Row(
                                 children: [
-                                  Container(
-                                      padding: const EdgeInsets.only(right: 15),
-                                      child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
+                                  Container(padding: const EdgeInsets.only(right: 15), child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
                                   Expanded(
                                     child: Text(
                                       procedureList[index],
                                       maxLines: procedureMaxLines,
                                     ),
                                   ),
-                                  IconButton(
-                                      onPressed: () => setState(() => procedureList.removeAt(index)),
-                                      icon: const Icon(Icons.delete))
+                                  IconButton(onPressed: () => setState(() => procedureList.removeAt(index)), icon: const Icon(Icons.delete))
                                 ],
                               ),
                               const Divider(),
@@ -194,8 +192,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    SizedBox(
-                        width: 30, child: Text('${procedureList.length + 1}.', style: const TextStyle(fontSize: 20))),
+                    SizedBox(width: 30, child: Text('${procedureList.length + 1}.', style: const TextStyle(fontSize: 20))),
                     Expanded(child: ProcedureTextField(procedureMinLines, procedureMaxLines)),
                     IconButton(
                         onPressed: () {
@@ -226,9 +223,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         child: TextButton(
                             style: OutlinedButton.styleFrom(
                               textStyle: const TextStyle(fontSize: 16),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(color: lightBlue, width: 1)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: const BorderSide(color: lightBlue, width: 1)),
                             ),
                             onPressed: () async {
                               if (titleController.text.isEmpty) {
@@ -248,25 +243,17 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               final String? key = prefs.getString("token");
                               if (key == null) throw ("Unable to get auth token");
                               setState(() => waitingForApiCallBack = true);
-                              final List<String> ingredientList =
-                                  ingredientsAddedController.map((i) => i.toString()).toList();
-                              var res = await createRecipe(key, titleController.text, ingredientList, procedureList,
-                                  notesController.text, !widget.isIteration,
-                                  parentRID: widget.parentRID  ?? widget.id);
+                              final List<String> ingredientList = ingredientsAddedController.map((i) => i.toString()).toList();
+                              var res = await createRecipe(key, titleController.text, ingredientList, procedureList, notesController.text, beginningRecipe,
+                                  parentRID: widget.parentRID ?? widget.id);
                               setState(() => waitingForApiCallBack = false);
                               if (res.statusCode >= 300) {
                                 errorPopUp("Error creating recipe");
                                 return;
                               }
-                              //if parentid is null we know that it's a beginning recipe
-                              bool beginningRecipe = (widget.parentRID == null && widget.id == null) ? true : false;
+
                               addRecipeToPrefs(res, prefs, beginningRecipe, widget.parentRID ?? widget.id);
-                              if (widget.isIteration) {
-                                Navigator.push(
-                                    context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
-                                return;
-                              }
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const Home()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
                             },
                             child: const Text(
                               "Create Recipe",
@@ -281,7 +268,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
   }
 
   void addRecipeToPrefs(Response res, SharedPreferences sp, bool beginningRecipe, int? recId) {
-    if (recId == null) throw Exception("Cannot create recipe because id is null");
     String id = recId.toString();
     try {
       if (beginningRecipe) {
@@ -289,7 +275,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
         ids.add(id);
         sp.setStringList("recipeIDList", ids);
         sp.setString(id, res.body);
-      } else if (sp.containsKey("$id iterations")) {
+      // ignore: curly_braces_in_flow_control_structures
+      } else if (recId == null) throw Exception("Cannot add recipe to prefs because id is null");
+      else if (sp.containsKey("$id iterations")) {
         var recStrList = sp.getStringList("$id iterations");
         recStrList!.add(res.body);
         sp.setStringList("$id iterations", recStrList);
@@ -321,8 +309,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   TextField ProcedureTextField(int procedureMinLines, int procedureMaxLines) {
     return TextField(
         textAlignVertical: TextAlignVertical.bottom,
-        decoration: const InputDecoration(
-            hintText: "enter the steps you took to create this recipe", hintStyle: TextStyle(fontSize: 10)),
+        decoration: const InputDecoration(hintText: "enter the steps you took to create this recipe", hintStyle: TextStyle(fontSize: 10)),
         minLines: procedureMinLines,
         maxLines: procedureMaxLines,
         controller: procedureController);
