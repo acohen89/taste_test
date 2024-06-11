@@ -51,26 +51,6 @@ class _HomeState extends State<Home> {
                           onPressed: () => Navigator.pushNamed(context, "createRecipe"), icon: const Icon(Icons.add))
                     ],
                   ),
-                  drawer: Drawer(
-                      child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      DrawerHeader(
-                        decoration: const BoxDecoration(
-                          color: Colors.blue,
-                        ),
-                        child: Text('Hello $name'),
-                      ),
-                      ListTile(
-                        title: const Text('Logout'),
-                        onTap: () async {
-                          deleteUserDetails();
-                          Navigator.pop(context);
-                          if (context.mounted) Navigator.of(context).pushNamed("login");
-                        },
-                      ),
-                    ],
-                  )),
                   body: FutureBuilder<List<Recipe>?>(
                       future: recs,
                       builder: (context, snapshot) {

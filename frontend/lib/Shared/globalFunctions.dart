@@ -160,3 +160,9 @@ Future<void> deleteBeginningRecipeFromPrefs(SharedPreferences sp, String id) asy
   await sp.remove(id); 
   await sp.remove("$id iterations"); 
 }
+
+
+void deleteUserDetails() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+}
