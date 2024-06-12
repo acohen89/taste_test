@@ -81,9 +81,9 @@ Future<bool> confirmDelete(BuildContext context, String title) {
   return completer.future;
 }
 
-Future<List<Recipe>?> getMainRecipes(Function filter, SharedPreferences prefs, String token, Function loadingError) async {
-  List<String>? recipesFromPrefs = getMainRecipesFromPrefs(prefs);
-  recipesFromPrefs = null;
+Future<List<Recipe>?> getMainRecipes(Function filter, SharedPreferences prefs, String token, Function loadingError, bool forceReload) async {
+  // if forceReload is true, we want to hit the api so we set the recipeFromPrefs to null to force that functionality 
+  List<String>? recipesFromPrefs = forceReload ? null : getMainRecipesFromPrefs(prefs);
   List<Recipe>? result = (recipesFromPrefs == null || recipesFromPrefs.isEmpty)
       ? await getRecipesAndSetPrefs(token, prefs, loadingError)
       : Recipe.stringsToRecipes(recipesFromPrefs);

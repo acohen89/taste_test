@@ -11,14 +11,15 @@ import 'package:taste_test/Components/noRecipe.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 import 'package:taste_test/Shared/constants.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class FinishedRecipes extends StatefulWidget {
+  final bool forceReload; 
+  const FinishedRecipes({super.key, this.forceReload = false});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<FinishedRecipes> createState() => _FinishedRecipesState();
 }
 
-class _HomeState extends State<Home> {
+class _FinishedRecipesState extends State<FinishedRecipes> {
   String? name;
   String? token;
   double blurValue = 0;
@@ -31,7 +32,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    recs = loadMainRecipes();
+    recs = loadMainRecipes(widget.forceReload);
   }
 
   @override
@@ -43,8 +44,9 @@ class _HomeState extends State<Home> {
             ImageFiltered(
               imageFilter: ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
               child: Scaffold(
-                  backgroundColor: const Color.fromARGB(255, 251, 234, 234),
+                  backgroundColor: Colors.white,
                   appBar: AppBar(
+                    automaticallyImplyLeading: false,
                     title: const Text("Your Recipes"),
                     actions: [
                       IconButton(
@@ -97,12 +99,12 @@ class _HomeState extends State<Home> {
         bottomNavigationBar: const BottomNavBar(startIndex: 2));
   }
 
-  Future<List<Recipe>?> loadMainRecipes() async {
+  Future<List<Recipe>?> loadMainRecipes(bool forceReload) async {
     List<Recipe>? filter(List<Recipe>? result) => result?.where((r) => r.in_progress == false).toList();
     await retrieveUserDetails();
     if (token == null) throw Exception("Null token");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await getMainRecipes(filter, prefs, token!, loadingError);
+    return await getMainRecipes(filter, prefs, token!, loadingError, forceReload);
   }
 
   Future<void> retrieveUserDetails() async {

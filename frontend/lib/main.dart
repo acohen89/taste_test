@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taste_test/Pages/home.dart';
+import 'package:taste_test/Pages/finishedRecipes.dart';
 import 'package:taste_test/Pages/settings.dart';
 import 'package:taste_test/Pages/inProgressRecipesPage.dart';
 import 'package:taste_test/Pages/login.dart';
@@ -33,7 +33,8 @@ class MyApp extends StatelessWidget {
             textTheme: GoogleFonts.anekTeluguTextTheme(Theme.of(context).textTheme)
             ),
         routes: {
-          'home': (context) => const Home(),
+          'finishedRecipes': (context) => const FinishedRecipes(),
+          'finishedRecipesWithReload': (context) => const FinishedRecipes(forceReload: true),
           'login': (context) => const LoginPage(),
           'signUp': (context) => const SignUp(),
           'createRecipe': (context) => const CreateRecipe(),

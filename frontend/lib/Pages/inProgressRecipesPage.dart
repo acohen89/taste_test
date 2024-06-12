@@ -11,7 +11,8 @@ import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 
 class inProgressRecipes extends StatefulWidget {
-  const inProgressRecipes({super.key});
+  final bool forceReload; 
+  const inProgressRecipes({super.key, this.forceReload = false});
 
   @override
   State<inProgressRecipes> createState() => _inProgressRecipesState();
@@ -24,7 +25,7 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
   @override
   void initState() {
     super.initState();
-    recs = loadMainRecipes();
+    recs = loadMainRecipes(widget.forceReload);
   }
 
   @override
@@ -99,11 +100,11 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
 
 
   
-  Future<List<Recipe>?> loadMainRecipes() async {
+  Future<List<Recipe>?> loadMainRecipes(bool forceReload) async {
     List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString("token");
     if(token == null) throw Exception("Null token");  
-    return getMainRecipes(filter, prefs, token, loadingError);
+    return getMainRecipes(filter, prefs, token, loadingError, forceReload);
   }
 }

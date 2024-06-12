@@ -18,9 +18,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
-    final double hoPadding = width/30.7; 
-    final double bottomPadding = height/38.83; 
-    final double topPadding = height/ 66.57; 
+    final double hoPadding = width / 30.7;
+    final double bottomPadding = height / 38.83;
+    final double topPadding = height / 66.57;
     const iconPadding = EdgeInsets.only(top: 2, left: 4, right: 4, bottom: 2);
     return Container(
       color: Colors.white,
@@ -45,7 +45,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 case 1: // Create
                   Navigator.pushNamed(context, "createRecipe");
                 case 2: // Finished recipes
-                  Navigator.pushNamed(context, "home");
+                  Navigator.pushNamed(context, "finishedRecipes");
                 case 3: // Settings
                   Navigator.pushNamed(context, "settings");
               }
@@ -58,16 +58,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
             padding: iconPadding,
             tabs: const [
               GButton(
-                icon: Icons.edit,
+                icon: Icons.notes,
                 text: 'Recipes In Progress',
               ),
               GButton(
                 icon: Icons.done,
-                text: 'Finished Recipes',
+                text: 'Create Recipe',
               ),
               GButton(
-                icon: Icons.create,
-                text: 'Create',
+                icon: Icons.edit_note,
+                text: 'Finished Recipes',
               ),
               GButton(
                 icon: Icons.settings,

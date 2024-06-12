@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.of(context).pop();
                             if (res.statusCode < 300) {
                               setPrefs(res.body);
-                              Navigator.of(context).pushNamed("home");
+                              Navigator.of(context).pushNamed("finishedRecipes");
                               return;
                             }
                             if (res.statusCode == 404) {

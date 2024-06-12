@@ -11,7 +11,7 @@ import "package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart";
 import "package:taste_test/Shared/apiCalls.dart";
 import "package:taste_test/Shared/constants.dart";
 import "package:taste_test/Ingredient/IngredientRow.dart";
-import "package:taste_test/Pages/home.dart";
+import "package:taste_test/Pages/finishedRecipes.dart";
 import "package:taste_test/Shared/globalFunctions.dart";
 
 class CreateRecipe extends StatefulWidget {
@@ -86,6 +86,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          automaticallyImplyLeading: widget.isIteration,
+
           title: Text(isIter ? "New Iteration" : "New Recipe"),
         ),
         body: Container(

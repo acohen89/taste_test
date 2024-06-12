@@ -176,7 +176,7 @@ class _SignUpState extends State<SignUp> {
                                     await SharedPreferences.getInstance();
                                 prefs.setString(
                                     'token', json.decode(res.body)["token"]);
-                                Navigator.of(context).pushNamed("home");
+                                Navigator.of(context).pushNamed("finishedRecipes");
                               } else if (res.statusCode == 406){
                                   setState(() => _usernameErrorTxt = "Username already exists");
                               }

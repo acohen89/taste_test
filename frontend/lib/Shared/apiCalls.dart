@@ -46,6 +46,15 @@ Future<http.Response> getRecipe(String token, int id,) async {
     return http.Response("", 503, reasonPhrase: e.toString());
   }
 }
+
+Future<http.Response> updateRecipeProgress(String token, int id,) async {
+  try {
+    return await http.post(Uri.parse("${ep}recipe/update_recipe_progress/?id=$id"),
+        headers: authHeader(token));
+  } catch (e) {
+    return http.Response("", 503, reasonPhrase: e.toString());
+  }
+}
 Future<http.Response> getRecipeIterations(String token, int id,) async {
   try {
     return await http.get(Uri.parse("${ep}recipe/get_recipe_iterations/?id=$id"),

@@ -70,9 +70,14 @@ class _SettingsState extends State<Settings> {
   Future<void> retrieveUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      fname = prefs.getString('first_name') ?? '';
-      lname = prefs.getString('last_name') ?? '';
+      fname = capitalizeFirstLetter(prefs.getString('first_name') ?? ''); 
+      lname = capitalizeFirstLetter(prefs.getString('last_name') ?? ''); 
     });
     return;
+  }
+  String capitalizeFirstLetter(String s){
+    if(s.isEmpty) return s; 
+    if(s.length == 1) return s.toUpperCase();
+    return s[0].toUpperCase() + s.substring(1, s.length); 
   }
 }

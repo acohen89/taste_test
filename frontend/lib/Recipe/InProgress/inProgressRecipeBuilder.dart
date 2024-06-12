@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taste_test/Pages/finishedRecipes.dart';
 import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -28,6 +29,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
   final PageController _controller = PageController();
   List<Recipe>? recipeIterations;
   late Future<List<Recipe>?> recsReturn;
+  bool deletingRecipe = false; 
   @override
   void initState() {
     super.initState();
@@ -57,7 +59,9 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                 child: Card(
                   color: Colors.transparent,
                   elevation: 15,
-                  child: Column(
+                  child: 
+                  deletingRecipe ? const SpinKitWave(color: lightBlue, size: 50) : 
+                  Column(
                     children: [
                       Expanded(
                         child: PageView.builder(
@@ -65,51 +69,78 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                           scrollDirection: Axis.horizontal,
                           itemCount: recps.length + 1,
                           itemBuilder: (context, index) {
-                            return index == recps.length ? 
-                            AddIteration(recps[index-1])
-                            : inProgressRecipeCard(
-                              horizontalCardPadding: widget.horizontalCardPadding,
-                              recipe: recps[index],
-                            );
+                            return index == recps.length
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AddIterationButton(recps[index - 1]),
+                                      OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(width: 2.0, color: lightBlue),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8.0),
+                                              )),
+                                          onPressed: () async {
+                                            final navigator = Navigator.of(context);
+                                            setState(() => deletingRecipe = true); 
+                                            SharedPreferences sp = await SharedPreferences.getInstance();
+                                            String? token = sp.getString("token"); 
+                                            if (token == null) throw Exception("Null token");
+                                            Response response = await updateRecipeProgress(token, recps[0].id); 
+                                            if(response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
+                                            if(response.statusCode == 406) throw Exception("Id param not properly given");
+                                            if(response.statusCode == 500) throw Exception("500 response");
+                                            setState(() => deletingRecipe = false); 
+                                            navigator.pushNamed("finishedRecipesWithReload");
+                                          },
+                                          child: const Text("Complete Recipe")),
+                                    ],
+                                  )
+                                : inProgressRecipeCard(
+                                    horizontalCardPadding: widget.horizontalCardPadding,
+                                    recipe: recps[index],
+                                  );
                           },
                         ),
                       ),
-                      
                     ],
                   ),
                 ),
               ),
-               Padding(
-                 padding: EdgeInsets.symmetric(vertical: widget.dotHeight),
-                 child: SmoothPageIndicator(
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: widget.dotHeight),
+                child: SmoothPageIndicator(
                   controller: _controller,
                   count: recps.length + 1,
                   effect: WormEffect(dotWidth: widget.dotSize, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
-                               ),
-               ),
+                ),
+              ),
             ],
           );
         });
   }
 
-  Container AddIteration(Recipe r) {
-    return  Container(
-      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.18, vertical:  MediaQuery.of(context).size.height * 0.38),
-      child: OutlinedButton(
+  OutlinedButton AddIterationButton(Recipe r) {
+    return OutlinedButton(
         style: OutlinedButton.styleFrom(
-           side: const BorderSide(width: 2.0, color: lightBlue), 
-           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0), 
-            )        ),
+            side: const BorderSide(width: 2.0, color: lightBlue),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            )),
         onPressed: () {
-          Navigator.push(context,   MaterialPageRoute(
-            builder: (context) => CreateRecipe(isIteration: true,
-              id: r.id,
-             title: r.title, parentRID: r.parentRID, ingredientList: [for(var i in r.ingredients) i.toString()], procedureList: [for(var p in r.procedure) p.toString()], notes: r.notes
-             )));
-        }, child: 
-        Text("Add a new iteration")),
-    ); 
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CreateRecipe(
+                      isIteration: true,
+                      id: r.id,
+                      title: r.title,
+                      parentRID: r.parentRID,
+                      ingredientList: [for (var i in r.ingredients) i.toString()],
+                      procedureList: [for (var p in r.procedure) p.toString()],
+                      notes: r.notes)));
+        },
+        child: Text("Add a new iteration"));
   }
 
   Future<List<Recipe>?> loadRecipeIterations(int id) async {
