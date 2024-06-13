@@ -11,7 +11,7 @@ import 'package:taste_test/Shared/constants.dart';
 
 class inProgressRecipeCard extends StatefulWidget {
   const inProgressRecipeCard({
-    super.key,
+  super.key,
     required this.recipe,
     required this.horizontalCardPadding,
   });
@@ -25,81 +25,79 @@ class inProgressRecipeCard extends StatefulWidget {
 class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => print(widget.recipe.id),
-      child: Column(
-        children: [
-          Flexible(
-            flex: 42,
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Title(),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-                    Ingredients(context),
-                    const SizedBox(height: 8),
-                    const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-                    Procedure(context),
-                    const SizedBox(height: 8),
-                    const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-                    widget.recipe.notes == null
-                        ? const Text(
-                            "none",
-                            style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),
-                          )
-                        : Text(
-                            widget.recipe.notes!,
-                            maxLines: null,
-                          ),
-                  ],
-                ),
+  final double verticalSpacing = widget.recipe.in_progress ? 24 : 0; 
+    return Column(
+      children: [
+        Flexible(
+          flex: 42,
+          child: Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: verticalSpacing, horizontal: 24),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width - (widget.horizontalCardPadding * 2),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if(widget.recipe.in_progress) Title(),
+                  if (widget.recipe.in_progress) const Divider(),
+                  const SizedBox(height: 8),
+                  const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                  Ingredients(context),
+                  const SizedBox(height: 8),
+                  const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                  Procedure(context),
+                  const SizedBox(height: 8),
+                  const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
+                  widget.recipe.notes == null
+                      ? const Text(
+                          "none",
+                          style: TextStyle(color: greyColor, fontStyle: FontStyle.italic),
+                        )
+                      : Text(
+                          widget.recipe.notes!,
+                          maxLines: null,
+                        ),
+                ],
               ),
             ),
           ),
-          Flexible(
-              flex: 2,
-              child: Container(
-                color: Colors.white,
-                padding: const EdgeInsets.only(right: 12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                        onPressed: () async {
-                          final String deleteText = widget.recipe.title + (widget.recipe.beginningRecipe ? " and all of it's iterations" : "");
-                          bool delete = await confirmDelete(context, deleteText);
-                          if (delete) {
-                            SharedPreferences sp = await SharedPreferences.getInstance();
-                            String? token = sp.getString("token");
-                            if (token == null) return deleteRecipeErrorPopUp("Error deleting recipe", "Null Token ");
-                            Response res = await deleteRecipe(token, widget.recipe.id.toString());
-                            if (res.statusCode >= 300) {
-                              return deleteRecipeErrorPopUp("Error deleting recipe", res.body);
+        ),
+        Flexible(
+            flex: 2,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                      onPressed: () async {
+                        final String deleteText = widget.recipe.title + (widget.recipe.beginningRecipe ? " and all of it's iterations" : "");
+                        bool delete = await confirmDelete(context, deleteText);
+                        if (delete) {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          String? token = sp.getString("token");
+                          if (token == null) return deleteRecipeErrorPopUp("Error deleting recipe", "Null Token ");
+                          Response res = await deleteRecipe(token, widget.recipe.id.toString());
+                          if (res.statusCode >= 300) {
+                            return deleteRecipeErrorPopUp("Error deleting recipe", res.body);
+                          } else {
+                            if (widget.recipe.beginningRecipe) {
+                              await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString()); 
                             } else {
-                              if (widget.recipe.beginningRecipe) {
-                                await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString()); 
-                              } else {
-                                deleteIterationFromPrefs(sp, widget.recipe.parentRID.toString(), widget.recipe.id.toString());
-                              }
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
+                              deleteIterationFromPrefs(sp, widget.recipe.parentRID.toString(), widget.recipe.id.toString());
                             }
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
                           }
-                        },
-                        icon: const Icon(size: 18, Icons.delete)),
-                    LastEdited(),
-                  ],
-                ),
-              ))
-        ],
-      ),
+                        }
+                      },
+                      icon: const Icon(size: 18, Icons.delete)),
+                  LastEdited(),
+                ],
+              ),
+            ))
+      ],
     );
   }
 

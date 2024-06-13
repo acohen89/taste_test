@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taste_test/Pages/fullRecipePageView.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
@@ -84,7 +85,8 @@ class _RecipeCardState extends State<RecipeCard> {
             ? deleteRecipeAnimation
             : GestureDetector(
                 onTap: () =>
-                    {if (!disableButtons) widget.setFocusRecipe(widget.recipe)},
+                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  FullRecipePageView(recipe:widget.recipe))),
+                    // {if (!disableButtons) widget.setFocusRecipe(widget.recipe)},
                 child: Card(
                     shape: cardShape,
                     elevation: cardElevation,

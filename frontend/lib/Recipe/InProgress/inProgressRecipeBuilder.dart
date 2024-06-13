@@ -74,26 +74,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       AddIterationButton(recps[index - 1]),
-                                      OutlinedButton(
-                                          style: OutlinedButton.styleFrom(
-                                              side: const BorderSide(width: 2.0, color: lightBlue),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8.0),
-                                              )),
-                                          onPressed: () async {
-                                            final navigator = Navigator.of(context);
-                                            setState(() => deletingRecipe = true); 
-                                            SharedPreferences sp = await SharedPreferences.getInstance();
-                                            String? token = sp.getString("token"); 
-                                            if (token == null) throw Exception("Null token");
-                                            Response response = await updateRecipeProgress(token, recps[0].id); 
-                                            if(response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
-                                            if(response.statusCode == 406) throw Exception("Id param not properly given");
-                                            if(response.statusCode == 500) throw Exception("500 response");
-                                            setState(() => deletingRecipe = false); 
-                                            navigator.pushNamed("finishedRecipesWithReload");
-                                          },
-                                          child: const Text("Complete Recipe")),
+                                      CompleteRecipe(context, recps),
                                     ],
                                   )
                                 : inProgressRecipeCard(
@@ -118,6 +99,29 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
             ],
           );
         });
+  }
+
+  OutlinedButton CompleteRecipe(BuildContext context, List<Recipe> recps) {
+    return OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                            side: const BorderSide(width: 2.0, color: lightBlue),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8.0),
+                                            )),
+                                        onPressed: () async {
+                                          final navigator = Navigator.of(context);
+                                          setState(() => deletingRecipe = true); 
+                                          SharedPreferences sp = await SharedPreferences.getInstance();
+                                          String? token = sp.getString("token"); 
+                                          if (token == null) throw Exception("Null token");
+                                          Response response = await updateRecipeProgress(token, recps[0].id); 
+                                          if(response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
+                                          if(response.statusCode == 406) throw Exception("Id param not properly given");
+                                          if(response.statusCode == 500) throw Exception("500 response");
+                                          setState(() => deletingRecipe = false); 
+                                          navigator.pushNamed("finishedRecipesWithReload");
+                                        },
+                                        child: const Text("Complete Recipe"));
   }
 
   OutlinedButton AddIterationButton(Recipe r) {
