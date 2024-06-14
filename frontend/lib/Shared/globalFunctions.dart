@@ -82,11 +82,14 @@ Future<bool> confirmDelete(BuildContext context, String title) {
 }
 
 Future<List<Recipe>?> getMainRecipes(Function filter, SharedPreferences prefs, String token, Function loadingError, bool forceReload) async {
-  // if forceReload is true, we want to hit the api so we set the recipeFromPrefs to null to force that functionality 
+  // if forceReload is true, we want to hit the api so we set the recipeFromPrefs to null to force that functionality
   List<String>? recipesFromPrefs = forceReload ? null : getMainRecipesFromPrefs(prefs);
-  List<Recipe>? result = (recipesFromPrefs == null || recipesFromPrefs.isEmpty)
-      ? await getRecipesAndSetPrefs(token, prefs, loadingError)
-      : Recipe.stringsToRecipes(recipesFromPrefs);
+  List<Recipe>? result;
+  if (recipesFromPrefs == null || recipesFromPrefs.isEmpty) {
+    result = await getRecipesAndSetPrefs(token, prefs, loadingError);
+  } else {
+    result = Recipe.stringsToRecipes(recipesFromPrefs);
+  }
   return filter(result);
 }
 
@@ -157,10 +160,9 @@ void deleteIterationFromPrefs(SharedPreferences sp, String parentRID, String id)
 Future<void> deleteBeginningRecipeFromPrefs(SharedPreferences sp, String id) async {
   if (!sp.containsKey("$id iterations")) throw Exception("sp does contain beginning $id iterations, trying to deleteBeginningRecipeFromPrefs");
   if (!sp.containsKey(id)) throw Exception("sp does contain recipe $id, trying to deleteBeginningRecipeFromPrefs");
-  await sp.remove(id); 
-  await sp.remove("$id iterations"); 
+  await sp.remove(id);
+  await sp.remove("$id iterations");
 }
-
 
 void deleteUserDetails() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

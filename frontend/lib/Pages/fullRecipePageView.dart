@@ -19,64 +19,49 @@ class _FullRecipePageViewState extends State<FullRecipePageView> {
       padding: const EdgeInsets.only(top: 48, bottom: 16, right: 16, left: 16),
       child: Column(
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: AutoSizeText(
-                  widget.recipe.title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  minFontSize: 14,
-                  maxLines: 3,
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.arrow_back_outlined,
-                      size: 32,
-                    )),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                    onPressed: () {
-                      
-                    },
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      size: 24,
-                    )),
-              )
-            ],
-          ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [Expanded(
-          //      child: IconButton(
-          //         onPressed: () => Navigator.pop(context),
-          //         icon: const Icon(
-          //           Icons.arrow_back_outlined,
-          //           size: 32,
-          //         )),
-          //    ),
-          //    AutoSizeText(
-          //      widget.recipe.title,
-          //      textAlign: TextAlign.center,
-          //      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          //      minFontSize: 14,
-          //      maxLines: 3,
-          //    ),
-          //     Spacer(),
-          // ],),
+          TopBar(context),
           const Divider(),
           Expanded(child: inProgressRecipeCard(recipe: widget.recipe, horizontalCardPadding: 0)),
         ],
       ),
     ));
+  }
+
+  Stack TopBar(BuildContext context) {
+    return Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: AutoSizeText(
+                widget.recipe.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                minFontSize: 14,
+                maxLines: 3,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
+                    size: 32,
+                  )),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                  onPressed: () {
+                  
+                  },
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 24,
+                  )),
+            )
+          ],
+        );
   }
 }

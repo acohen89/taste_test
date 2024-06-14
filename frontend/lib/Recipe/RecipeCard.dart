@@ -57,8 +57,7 @@ class _RecipeCardState extends State<RecipeCard> {
       fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: -0.8);
 
   final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: const BorderSide(color: lightBlue, width: 4));
+      borderRadius: BorderRadius.circular(16));
 
   final deleteRecipeAnimation =
       const SpinKitCubeGrid(color: lightBlue, size: 200);

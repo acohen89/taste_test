@@ -9,5 +9,6 @@ urlpatterns = [
     path('get_recipe/', views.get_recipe),
     path('get_recipe_iterations/', views.get_recipe_iterations),
     path('delete_recipe', views.delete_recipe),
-    path('delete_all_user_recipes', views.delete_all_user_recipes)
+    path('delete_all_user_recipes', views.delete_all_user_recipes),
+    path('update_recipe_progress/', views.update_recipe_progress)
 ]

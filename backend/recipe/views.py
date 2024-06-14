@@ -31,14 +31,28 @@ def create_recipe(request):
                 else: 
                     return Response(URSerializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         else:
-            print("here")
             curRecipe = Recipe.objects.get(pk=recipeSerializer.data["id"])
+            if(request.data["parentRID"] is None): return Response({"Message": "No ParentID given"}, status=status.HTTP_406_NOT_ACCEPTABLE) 
             mainRecipe = Recipe.objects.get(pk=request.data["parentRID"])
             mainRecipe.iteration_ids.add(curRecipe)
             return Response(recipeSerializer.data, status=status.HTTP_201_CREATED) 
     else:
         return Response(recipeSerializer.errors, status=status.HTTP_400_BAD_REQUEST) 
     
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+def update_recipe_progress(request):
+    id = request.GET.get('id', '')
+    if id == '': return Response({"Message":"No id parameter given"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    if not Recipe.objects.filter(pk=id).exists(): 
+        return Response({"Message": "Recipe ID not found"}, status=status.HTTP_404_NOT_FOUND) 
+    recipe = Recipe.objects.get(pk=id)
+    Recipe.objects.filter(pk=id).update(in_progress=not recipe.in_progress)
+    return Response({"Message": f"Updated recipe {id} to {not recipe.in_progress}"}, status=status.HTTP_200_OK)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
