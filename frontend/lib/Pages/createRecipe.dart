@@ -39,6 +39,7 @@ class CreateRecipe extends StatefulWidget {
 }
 
 class _CreateRecipeState extends State<CreateRecipe> {
+  final TextStyle hintTextStyle = const TextStyle(fontSize: 8, fontStyle: FontStyle.italic );
   String missingInputText = "";
   List<String> procedureList = [];
   List<String> ingredientWidgets = ["One"];
@@ -87,7 +88,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: widget.isIteration,
-
           title: Text(isIter ? "New Iteration" : "New Recipe"),
         ),
         body: Container(
@@ -149,7 +149,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           }
                           addIngredient();
                         },
-                        icon: const Icon(Icons.check, size: 22)),
+                        icon: const Icon(
+                          Icons.add,
+                        )),
                   ],
                 ),
                 const SizedBox(height: titleSpace),
@@ -277,8 +279,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
         ids.add(id);
         sp.setStringList("recipeIDList", ids);
         sp.setString(id, res.body);
-      // ignore: curly_braces_in_flow_control_structures
-      } else if (recId == null) throw Exception("Cannot add recipe to prefs because id is null");
+        // ignore: curly_braces_in_flow_control_structures
+      } else if (recId == null)
+        throw Exception("Cannot add recipe to prefs because id is null");
       else if (sp.containsKey("$id iterations")) {
         var recStrList = sp.getStringList("$id iterations");
         recStrList!.add(res.body);
@@ -322,19 +325,21 @@ class _CreateRecipeState extends State<CreateRecipe> {
       textAlignVertical: TextAlignVertical.bottom,
       controller: ingredientsController,
       decoration: InputDecoration(
+        hintStyle: hintTextStyle,
         isDense: true,
         contentPadding: const EdgeInsets.all(8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ingredientInputRadius),
           borderSide: const BorderSide(color: greyColor),
         ),
-        hintText: '',
+        hintText: 'ingredient',
       ),
     );
   }
 
-  DropdownButton<Unit> UnitDropDown() {
+  DropdownButton UnitDropDown() {
     return DropdownButton(
+      hint: Text("Unit", style: hintTextStyle,),
       padding: const EdgeInsets.symmetric(horizontal: 6),
       value: unitController,
       onChanged: (newValue) {
@@ -350,17 +355,16 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
   TextField QuantityTextField(double ingredientInputRadius) {
     return TextField(
-      textAlignVertical: TextAlignVertical.bottom,
-      textAlign: TextAlign.right,
       controller: quantityController,
       decoration: InputDecoration(
+        hintStyle: hintTextStyle,
         isDense: true,
-        contentPadding: const EdgeInsets.only(right: 10, top: 10, bottom: 0),
+       contentPadding: const EdgeInsets.all(8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ingredientInputRadius),
           borderSide: const BorderSide(color: greyColor),
         ),
-        hintText: '',
+        hintText: "quantity"
       ),
     );
   }

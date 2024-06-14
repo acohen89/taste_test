@@ -62,7 +62,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 text: 'Recipes In Progress',
               ),
               GButton(
-                icon: Icons.done,
+                icon: Icons.add,
                 text: 'Create Recipe',
               ),
               GButton(

@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const ep = 'http://127.0.0.1:8000/';
+const ep = 'https://taste-test.up.railway.app/';
 
 Future<http.Response> deleteRecipe(String token, String id) async {
   final body = jsonEncode(<String, dynamic>{"id": id});
