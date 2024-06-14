@@ -1,1 +1,1 @@
-web: python manage.py runserver 0.0.0.0:47872
+web: gunicorn TasteTest.wsgi --log-file - 
