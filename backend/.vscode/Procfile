@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn TasteTest.wsg
+web: python manage.py runserver 0.0.0.0:47872
