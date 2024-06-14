@@ -1,1 +1,1 @@
-web: gunicorn TasteTest.wsgi --log-file - 
+web: gunicorn TasteTest.wsgi
