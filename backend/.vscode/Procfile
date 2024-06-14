@@ -1,1 +1,2 @@
 web: gunicorn TasteTest.wsgi
+release: bash release.sh
