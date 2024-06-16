@@ -1,31 +1,34 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/Pages/inProgressRecipesPage.dart';
+import 'package:taste_test/Pages/inProgressRecipe/inProgressRecipesPage.dart';
+import 'package:taste_test/Recipe/FullRecipeCard/fullRecipeCardComponents/ingredients.dart';
+import 'package:taste_test/Recipe/FullRecipeCard/fullRecipeCardComponents/last_edited.dart';
+import 'package:taste_test/Recipe/FullRecipeCard/fullRecipeCardComponents/procedure.dart';
+import 'package:taste_test/Recipe/FullRecipeCard/fullRecipeCardComponents/title.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 import 'package:taste_test/Shared/constants.dart';
 
-class inProgressRecipeCard extends StatefulWidget {
-  const inProgressRecipeCard({
+class FullRecipeCard extends StatefulWidget {
+  const FullRecipeCard({
     super.key,
     required this.recipe,
     required this.horizontalCardPadding,
+    required this.isFinished,
   });
 
   final Recipe recipe;
   final double horizontalCardPadding;
+  final bool isFinished;
   @override
-  State<inProgressRecipeCard> createState() => _inProgressRecipeCardState();
+  State<FullRecipeCard> createState() => _FullRecipeCardState();
 }
 
-class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
+class _FullRecipeCardState extends State<FullRecipeCard> {
   @override
   Widget build(BuildContext context) {
-    final double verticalSpacing = widget.recipe.in_progress ? 24 : 0;
+    final double verticalSpacing = !widget.isFinished ? 24 : 0;
     return Column(
       children: [
         Flexible(
@@ -39,14 +42,14 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.recipe.in_progress) Title(),
-                  if (widget.recipe.in_progress) const Divider(),
+                  if (!widget.isFinished) TitleWidget(widget: widget),
+                  if (!widget.isFinished) const Divider(),
                   const SizedBox(height: 8),
                   const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-                  Ingredients(context),
+                  Ingredients(widget: widget, context: context),
                   const SizedBox(height: 8),
                   const Text("Procedure", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
-                  Procedure(context),
+                  Procedure(widget: widget, context: context),
                   const SizedBox(height: 8),
                   const Text("Notes", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
                   widget.recipe.notes == null
@@ -79,7 +82,7 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           final String token = await getToken(sp, "deleteRecipe in fullRecipeCard");
                           if (token == null) return deleteRecipeErrorPopUp("Error deleting recipe", "Null Token ");
-                          bool success =  await deleteRecipe(token, widget.recipe.id.toString());
+                          bool success = await deleteRecipe(token, widget.recipe.id.toString());
                           if (!success) {
                             return deleteRecipeErrorPopUp("Error deleting recipe", "");
                           } else {
@@ -93,7 +96,7 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                         }
                       },
                       icon: const Icon(size: 18, Icons.delete)),
-                  LastEdited(),
+                  LastEdited(widget: widget),
                 ],
               ),
             ))
@@ -105,59 +108,5 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
     final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
     throw Exception(exception);
-  }
-
-  Text LastEdited() {
-    return Text("Edited ${DateFormat('h:mma M/d').format(DateTime.parse(widget.recipe.last_edited))}",
-        style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic));
-  }
-
-  Column Procedure(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 0; i < widget.recipe.procedure.length; i++)
-          RichText(
-            text: TextSpan(
-              text: "${i + 1}. ",
-              style: DefaultTextStyle.of(context).style,
-              children: <TextSpan>[
-                TextSpan(text: widget.recipe.procedure[i], style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            maxLines: null,
-          )
-      ],
-    );
-  }
-
-  Column Ingredients(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (String ingredient in widget.recipe.ingredients)
-          RichText(
-            text: TextSpan(
-              text: bullet,
-              style: DefaultTextStyle.of(context).style,
-              children: <TextSpan>[
-                TextSpan(text: ingredient, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            maxLines: null,
-          )
-      ],
-    );
-  }
-
-  Center Title() {
-    return Center(
-        child: AutoSizeText(
-      widget.recipe.title,
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      minFontSize: 14,
-      maxLines: 3,
-    ));
   }
 }

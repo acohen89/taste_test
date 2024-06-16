@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/Recipe/fullRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Recipe/RecipeCard.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
@@ -148,28 +147,5 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
     setState(() {
       recipes!.removeAt(index);
     });
-  }
-}
-
-class createRecipeButton extends StatelessWidget {
-  const createRecipeButton({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return RawMaterialButton(
-      onPressed: () async {
-        Navigator.pushNamed(context, "createRecipe");
-      },
-      elevation: 2.0,
-      fillColor: Colors.white,
-      padding: EdgeInsets.all(15.0),
-      shape: const CircleBorder(),
-      child: const Icon(
-        Icons.edit_note_rounded,
-        size: 30.0,
-      ),
-    );
   }
 }
