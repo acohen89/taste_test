@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
+import 'package:taste_test/Pages/settings/settingsComponents/logout_button.dart';
 import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 
@@ -40,31 +41,13 @@ class _SettingsState extends State<Settings> {
             ),
               Row(
                 children: [
-                  LogoutButton(context),
+                  LogoutButton(context: context),
                 ],
               ),
           ],
         ),
       ),
     );
-  }
-
-  OutlinedButton LogoutButton(BuildContext context) {
-    return OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(width: 1.5, color: greyColor), // Small border with blue color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0), // Slightly circular border
-              ),
-              backgroundColor: Colors.transparent, // No background color
-            ),
-            child: const Text("Logout", style: TextStyle(color: lightBlue),),
-            onPressed: () {
-              deleteUserDetails();
-              Navigator.pop(context);
-              if (context.mounted) Navigator.of(context).pushNamed("login");
-            },
-          );
   }
 
   Future<void> retrieveUserDetails() async {

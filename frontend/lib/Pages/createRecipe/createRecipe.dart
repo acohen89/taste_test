@@ -1,18 +1,20 @@
-import "dart:convert";
-import "dart:developer";
 
+import "dart:developer";
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import "package:http/http.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:taste_test/Components/BottomNavBar.dart";
 import "package:taste_test/Ingredient/IngredientClass.dart";
-import "package:taste_test/Pages/inProgressRecipesPage.dart";
-import "package:taste_test/Recipe/InProgress/inProgressRecipeBuilder.dart";
+import "package:taste_test/Pages/createRecipe/createRecipeComponents/ingredient_text_field.dart";
+import "package:taste_test/Pages/createRecipe/createRecipeComponents/notes_text_field.dart";
+import "package:taste_test/Pages/createRecipe/createRecipeComponents/procedure_field.dart";
+import "package:taste_test/Pages/createRecipe/createRecipeComponents/quantity_text_field.dart";
+import "package:taste_test/Pages/createRecipe/createRecipeComponents/title_text_field.dart";
+import "package:taste_test/Pages/inProgressRecipe/inProgressRecipesPage.dart";
 import "package:taste_test/Shared/apiCalls.dart";
 import "package:taste_test/Shared/constants.dart";
 import "package:taste_test/Ingredient/IngredientRow.dart";
-import "package:taste_test/Pages/finishedRecipes.dart";
 import "package:taste_test/Shared/globalFunctions.dart";
 
 class CreateRecipe extends StatefulWidget {
@@ -101,7 +103,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     Text("Title", style: headingStyle),
                   ],
                 ),
-                TitleTextField(inputBoxRadius),
+                TitleTextField(titleController: titleController, inputBoxRadius: inputBoxRadius),
                 const SizedBox(height: titleSpace),
                 const Row(
                   children: [
@@ -127,11 +129,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   children: [
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.15,
-                      child: QuantityTextField(ingredientInputRadius),
+                      child: QuantityTextField(quantityController: quantityController, hintTextStyle: hintTextStyle, ingredientInputRadius: ingredientInputRadius),
                     ),
                     UnitDropDown(),
                     Expanded(
-                      child: IngredientTextField(ingredientInputRadius),
+                      child: IngredientTextField(ingredientsController: ingredientsController, hintTextStyle: hintTextStyle, ingredientInputRadius: ingredientInputRadius),
                     ),
                     IconButton(
                         onPressed: () {
@@ -198,7 +200,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(width: 30, child: Text('${procedureList.length + 1}.', style: const TextStyle(fontSize: 20))),
-                    Expanded(child: ProcedureTextField(procedureMinLines, procedureMaxLines)),
+                    Expanded(child: ProcedureField(procedureController: procedureController, procedureMinLines: procedureMinLines, procedureMaxLines: procedureMaxLines)),
                     IconButton(
                         onPressed: () {
                           if (procedureController.text.isEmpty) {
@@ -219,7 +221,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     Text("Notes", style: headingStyle),
                   ],
                 ),
-                NotesTextField(inputBoxRadius),
+                NotesTextField(notesController: notesController, inputBoxRadius: inputBoxRadius),
                 const SizedBox(height: titleSpace),
                 waitingForApiCallBack
                     ? const SpinKitWave(color: lightBlue, size: 50)
@@ -299,49 +301,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
     }
   }
 
-  TextField NotesTextField(double inputBoxRadius) {
-    return TextField(
-      textAlignVertical: TextAlignVertical.bottom,
-      maxLines: null,
-      controller: notesController,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.notes),
-        isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(inputBoxRadius),
-          borderSide: const BorderSide(color: greyColor),
-        ),
-        hintText: 'any notes on this recipe',
-      ),
-    );
-  }
-
-  TextField ProcedureTextField(int procedureMinLines, int procedureMaxLines) {
-    return TextField(
-        textAlignVertical: TextAlignVertical.bottom,
-        decoration: const InputDecoration(hintText: "enter the steps you took to create this recipe", hintStyle: TextStyle(fontSize: 10)),
-        minLines: procedureMinLines,
-        maxLines: procedureMaxLines,
-        controller: procedureController);
-  }
-
-  TextField IngredientTextField(double ingredientInputRadius) {
-    return TextField(
-      textAlignVertical: TextAlignVertical.bottom,
-      controller: ingredientsController,
-      decoration: InputDecoration(
-        hintStyle: hintTextStyle,
-        isDense: true,
-        contentPadding: const EdgeInsets.all(8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ingredientInputRadius),
-          borderSide: const BorderSide(color: greyColor),
-        ),
-        hintText: 'ingredient',
-      ),
-    );
-  }
-
   DropdownButton UnitDropDown() {
     return DropdownButton(
       hint: Text(
@@ -358,38 +317,6 @@ class _CreateRecipeState extends State<CreateRecipe> {
       items: Unit.values.map((Unit classType) {
         return DropdownMenuItem<Unit>(value: classType, child: Text(classType.name));
       }).toList(),
-    );
-  }
-
-  TextField QuantityTextField(double ingredientInputRadius) {
-    return TextField(
-      controller: quantityController,
-      decoration: InputDecoration(
-          hintStyle: hintTextStyle,
-          isDense: true,
-          contentPadding: const EdgeInsets.all(8),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(ingredientInputRadius),
-            borderSide: const BorderSide(color: greyColor),
-          ),
-          hintText: "quantity"),
-    );
-  }
-
-  TextFormField TitleTextField(double inputBoxRadius) {
-    return TextFormField(
-      textAlignVertical: TextAlignVertical.bottom,
-      maxLines: null,
-      controller: titleController,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.title),
-        isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(inputBoxRadius),
-          borderSide: const BorderSide(color: greyColor),
-        ),
-        hintText: 'enter recipe title',
-      ),
     );
   }
 

@@ -1,8 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/Recipe/fullRecipeCard.dart';
+import 'package:taste_test/Recipe/FullRecipeCard/FullRecipeCard.dart'; 
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
@@ -28,7 +26,8 @@ class _FullRecipePageViewState extends State<FullRecipePageView> {
         children: [
           TopBar(context),
           const Divider(),
-          Expanded(child: inProgressRecipeCard(recipe: widget.recipe, horizontalCardPadding: 0)),
+          // is finished true because it's coming from finished recipe page
+          Expanded(child: FullRecipeCard(recipe: widget.recipe, horizontalCardPadding: 0, isFinished: true)),
         ],
       ),
     ));
