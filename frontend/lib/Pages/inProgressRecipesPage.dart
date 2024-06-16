@@ -11,7 +11,7 @@ import 'package:taste_test/Shared/constants.dart';
 import 'package:taste_test/Shared/globalFunctions.dart';
 
 class inProgressRecipes extends StatefulWidget {
-  final bool forceReload; 
+  final bool forceReload;
   const inProgressRecipes({super.key, this.forceReload = false});
 
   @override
@@ -31,13 +31,12 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
   @override
   Widget build(BuildContext context) {
     final double horizontalCardPadding = MediaQuery.of(context).size.width * 0.05;
-    const double horizontalPageIndicatorPadding = 8; 
-    const double dotSize = 4; 
-    const double verticalPadding = dotSize + (horizontalPageIndicatorPadding * 2); 
+    const double horizontalPageIndicatorPadding = 8;
+    const double dotSize = 4;
+    const double verticalPadding = dotSize + (horizontalPageIndicatorPadding * 2);
     const double topPadding = 32;
-    const double verticalPageIndicatorPadding = (topPadding-dotSize)/2; 
-    const cardPadding =
-        EdgeInsets.only(top: topPadding, bottom:0 , left: 0, right: verticalPadding);
+    const double verticalPageIndicatorPadding = (topPadding - dotSize) / 2;
+    const cardPadding = EdgeInsets.only(top: topPadding, bottom: 0, left: 0, right: verticalPadding);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -64,24 +63,25 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
                             controller: _controller,
                             count: recipes!.length,
                             axisDirection: Axis.vertical,
-                            effect: const WormEffect(dotWidth: dotSize,  dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
+                            effect: const WormEffect(dotWidth: dotSize, dotHeight: 8, activeDotColor: lightBlue, dotColor: greyColor),
                           ),
                         ),
-                            Expanded(
+                        Expanded(
                             child: PageView.builder(
                                 scrollDirection: Axis.vertical,
                                 controller: _controller,
-                                itemCount: recipes!.length, 
+                                itemCount: recipes!.length,
                                 itemBuilder: (context, index) {
-                                  return  Container(
+                                  return Container(
                                     color: Colors.white,
                                     padding: cardPadding,
                                     width: MediaQuery.of(context).size.width,
                                     height: MediaQuery.of(context).size.height,
                                     child: inProgressRecipeBuilder(
                                         dotHeight: verticalPageIndicatorPadding,
-                                        dotSize: dotSize, 
-                                        recipe: recipes[index], horizontalCardPadding: horizontalCardPadding),
+                                        dotSize: dotSize,
+                                        recipe: recipes[index],
+                                        horizontalCardPadding: horizontalCardPadding),
                                   );
                                 })),
                       ],
@@ -98,13 +98,10 @@ class _inProgressRecipesState extends State<inProgressRecipes> {
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
-
-  
   Future<List<Recipe>?> loadMainRecipes(bool forceReload) async {
     List<Recipe> filter(List<Recipe> recps) => recps.where((r) => r.in_progress == true).toList();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("token");
-    if(token == null) throw Exception("Null token");  
+    final String token = await getToken(prefs, "loadMainRecipes in inProgressRecipesPage");
     return getMainRecipes(filter, prefs, token, loadingError, forceReload);
   }
 }

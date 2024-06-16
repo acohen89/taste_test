@@ -11,7 +11,7 @@ import 'package:taste_test/Shared/constants.dart';
 
 class inProgressRecipeCard extends StatefulWidget {
   const inProgressRecipeCard({
-  super.key,
+    super.key,
     required this.recipe,
     required this.horizontalCardPadding,
   });
@@ -25,7 +25,7 @@ class inProgressRecipeCard extends StatefulWidget {
 class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
   @override
   Widget build(BuildContext context) {
-  final double verticalSpacing = widget.recipe.in_progress ? 24 : 0; 
+    final double verticalSpacing = widget.recipe.in_progress ? 24 : 0;
     return Column(
       children: [
         Flexible(
@@ -39,7 +39,7 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if(widget.recipe.in_progress) Title(),
+                  if (widget.recipe.in_progress) Title(),
                   if (widget.recipe.in_progress) const Divider(),
                   const SizedBox(height: 8),
                   const Text("Ingredients", style: TextStyle(fontStyle: FontStyle.italic, fontSize: 20, color: lightBlue)),
@@ -77,14 +77,14 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                         bool delete = await confirmDelete(context, deleteText);
                         if (delete) {
                           SharedPreferences sp = await SharedPreferences.getInstance();
-                          String? token = sp.getString("token");
+                          final String token = await getToken(sp, "deleteRecipe in fullRecipeCard");
                           if (token == null) return deleteRecipeErrorPopUp("Error deleting recipe", "Null Token ");
-                          Response res = await deleteRecipe(token, widget.recipe.id.toString());
-                          if (res.statusCode >= 300) {
-                            return deleteRecipeErrorPopUp("Error deleting recipe", res.body);
+                          bool success =  await deleteRecipe(token, widget.recipe.id.toString());
+                          if (!success) {
+                            return deleteRecipeErrorPopUp("Error deleting recipe", "");
                           } else {
                             if (widget.recipe.beginningRecipe) {
-                              await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString()); 
+                              await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString());
                             } else {
                               deleteIterationFromPrefs(sp, widget.recipe.parentRID.toString(), widget.recipe.id.toString());
                             }

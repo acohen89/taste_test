@@ -149,25 +149,19 @@ class _RecipeCardState extends State<RecipeCard> {
                                       onPressed: () async {
                                         if (!disableButtons) {
                                           widget.deleteInProgressToggle(widget.index);
-                                          await confirmDelete(context,recipe.title).then((delete) {
+                                          await confirmDelete(context, recipe.title).then((delete) async {
                                             if (delete) {
                                               setState(() => deletingRecipe = true);
-                                              SharedPreferences.getInstance().then((prefs) {
-                                                return prefs.getString('token') ?? "";
-                                              }).then((key) {
-                                                if (key == "") throw Exception("Empty key");
-                                                return deleteRecipe(key, recipe.id.toString());
-                                              }).then((res) async {
-                                                if (res.statusCode >= 300) {
-                                                  print(res.body);
-                                                  deleteRecipeErrorPopUp("Error deleting recipe");
-                                                } else {
-                                                  SharedPreferences prefs = await SharedPreferences.getInstance(); 
-                                                  deleteBeginningRecipeFromPrefs(prefs, (recipe.parentRID ?? recipe.id).toString());
-                                                  widget.removeFunc();
-                                                }
-                                                setState(() => deletingRecipe = false);
-                                              });
+                                              String token = await getToken(null, "delete recipe in recipe card");
+                                              bool success = await deleteRecipe(token, recipe.id.toString());
+                                              if (!success) {
+                                                deleteRecipeErrorPopUp("Error deleting recipe");
+                                              } else {
+                                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                deleteBeginningRecipeFromPrefs(prefs, (recipe.parentRID ?? recipe.id).toString());
+                                                widget.removeFunc();
+                                              }
+                                              setState(() => deletingRecipe = false);
                                             }
                                           });
                                           widget.resetDeleteIndex();

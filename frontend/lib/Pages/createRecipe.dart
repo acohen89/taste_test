@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:developer";
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -39,7 +40,7 @@ class CreateRecipe extends StatefulWidget {
 }
 
 class _CreateRecipeState extends State<CreateRecipe> {
-  final TextStyle hintTextStyle = const TextStyle(fontSize: 8, fontStyle: FontStyle.italic );
+  final TextStyle hintTextStyle = const TextStyle(fontSize: 8, fontStyle: FontStyle.italic);
   String missingInputText = "";
   List<String> procedureList = [];
   List<String> ingredientWidgets = ["One"];
@@ -242,16 +243,20 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 errorPopUp("Please add at least one step to the procedure");
                                 return;
                               }
-
-                              final SharedPreferences prefs = await SharedPreferences.getInstance();
-                              final String? key = prefs.getString("token");
-                              if (key == null) throw ("Unable to get auth token");
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final String token = await getToken(prefs, "create recipe");
                               setState(() => waitingForApiCallBack = true);
                               final List<String> ingredientList = ingredientsAddedController.map((i) => i.toString()).toList();
-                              var res = await createRecipe(key, titleController.text, ingredientList, procedureList, notesController.text, beginningRecipe,
+                              Response res = await createRecipe(token, titleController.text, ingredientList, procedureList, notesController.text, beginningRecipe,
                                   parentRID: widget.parentRID ?? widget.id);
                               setState(() => waitingForApiCallBack = false);
-                              if (res.statusCode >= 300) {
+                              if (res.statusCode == 400) {
+                                log(res.body); 
+                                errorPopUp("Error creating recipe");
+                                return;
+                              }
+                              if (res.statusCode == 406) {
+                                log("no parent id given, ${res.body}"); 
                                 errorPopUp("Error creating recipe");
                                 return;
                               }
@@ -339,7 +344,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
   DropdownButton UnitDropDown() {
     return DropdownButton(
-      hint: Text("Unit", style: hintTextStyle,),
+      hint: Text(
+        "Unit",
+        style: hintTextStyle,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 6),
       value: unitController,
       onChanged: (newValue) {
@@ -357,15 +365,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
     return TextField(
       controller: quantityController,
       decoration: InputDecoration(
-        hintStyle: hintTextStyle,
-        isDense: true,
-       contentPadding: const EdgeInsets.all(8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(ingredientInputRadius),
-          borderSide: const BorderSide(color: greyColor),
-        ),
-        hintText: "quantity"
-      ),
+          hintStyle: hintTextStyle,
+          isDense: true,
+          contentPadding: const EdgeInsets.all(8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(ingredientInputRadius),
+            borderSide: const BorderSide(color: greyColor),
+          ),
+          hintText: "quantity"),
     );
   }
 

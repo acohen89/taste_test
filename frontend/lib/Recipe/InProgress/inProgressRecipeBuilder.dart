@@ -111,17 +111,20 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
         onPressed: () async {
           final navigator = Navigator.of(context);
           setState(() => deletingRecipe = true);
-          SharedPreferences sp = await SharedPreferences.getInstance();
-          String? token = sp.getString("token");
-          if (token == null) throw Exception("Null token");
-          Response response = await updateRecipeProgress(token, recps[0].id);
-          if (response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
-          if (response.statusCode == 406) throw Exception("Id param not properly given");
-          if (response.statusCode == 500) throw Exception("500 response");
+          final String token = await getToken(null, "Complete Recipe in IPRecipeBuilder");
+          bool success = await updateRecipeProgress(token, recps[0].id);
           setState(() => deletingRecipe = false);
+          if(!success){
+            errorPopUp("Can't edit Recipe"); 
+            return;
+          } 
           navigator.pushNamed("finishedRecipesWithReload");
         },
         child: const Text("Complete Recipe"));
+  }
+   void errorPopUp(String text, {int duration = 2250}) {
+    final snack = snackBarError(text, duration);
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
   OutlinedButton AddIterationButton(Recipe r) {
@@ -151,11 +154,10 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     List<Recipe>? recipesFromPrefs = getIterationRecipeFromPrefs(id, sp);
     if (recipesFromPrefs != null) return recipesFromPrefs;
-    final String? token = sp.getString("token");
-    if (token == null) throw Exception("Null token");
+    final String token = await getToken(sp, "loadRecipeIterations in ipRecipeBuilder");
     try {
-     List<String>? strRecipes = await getRecipeIterationsAndSetPrefs(token, id, sp, loadingError);
-      if(strRecipes == null) throw Exception("Recipes null");
+      List<String>? strRecipes = await getRecipeIterationsAndSetPrefs(token, id, sp, loadingError);
+      if (strRecipes == null) throw Exception("Recipes null");
       return Recipe.stringsToRecipes(strRecipes);
     } catch (e) {
       throw Exception("$e, could not parse iterations body");
