@@ -15,7 +15,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool showPassword = false; 
+  bool obscurePassword = true; 
     final usernameController = TextEditingController();
     final passwordController = TextEditingController();
   @override
@@ -64,12 +64,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                     TextField(
-                      obscureText: showPassword,
+                      obscureText: obscurePassword,
                       controller: passwordController,
                       decoration: InputDecoration(
                         suffixIcon: IconButton(
-                        onPressed: () => setState(() => showPassword = !showPassword), 
-                        icon:  Icon(showPassword ? Icons.visibility : Icons.visibility_off), 
+                        onPressed: () => setState(() => obscurePassword = !obscurePassword), 
+                        icon:  Icon(obscurePassword ? Icons.visibility : Icons.visibility_off), 
                         ),
                         prefixIcon: const Icon(Icons.password),
                         isDense: true,

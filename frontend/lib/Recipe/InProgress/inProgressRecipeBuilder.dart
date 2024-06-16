@@ -29,7 +29,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
   final PageController _controller = PageController();
   List<Recipe>? recipeIterations;
   late Future<List<Recipe>?> recsReturn;
-  bool deletingRecipe = false; 
+  bool deletingRecipe = false;
   @override
   void initState() {
     super.initState();
@@ -59,33 +59,33 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
                 child: Card(
                   color: Colors.transparent,
                   elevation: 15,
-                  child: 
-                  deletingRecipe ? const SpinKitWave(color: lightBlue, size: 50) : 
-                  Column(
-                    children: [
-                      Expanded(
-                        child: PageView.builder(
-                          controller: _controller,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: recps.length + 1,
-                          itemBuilder: (context, index) {
-                            return index == recps.length
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      AddIterationButton(recps[index - 1]),
-                                      CompleteRecipe(context, recps),
-                                    ],
-                                  )
-                                : inProgressRecipeCard(
-                                    horizontalCardPadding: widget.horizontalCardPadding,
-                                    recipe: recps[index],
-                                  );
-                          },
+                  child: deletingRecipe
+                      ? const SpinKitWave(color: lightBlue, size: 50)
+                      : Column(
+                          children: [
+                            Expanded(
+                              child: PageView.builder(
+                                controller: _controller,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: recps.length + 1,
+                                itemBuilder: (context, index) {
+                                  return index == recps.length
+                                      ? Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            AddIterationButton(recps[index - 1]),
+                                            CompleteRecipe(context, recps),
+                                          ],
+                                        )
+                                      : inProgressRecipeCard(
+                                          horizontalCardPadding: widget.horizontalCardPadding,
+                                          recipe: recps[index],
+                                        );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               Padding(
@@ -103,25 +103,25 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
 
   OutlinedButton CompleteRecipe(BuildContext context, List<Recipe> recps) {
     return OutlinedButton(
-                                        style: OutlinedButton.styleFrom(
-                                            side: const BorderSide(width: 2.0, color: lightBlue),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8.0),
-                                            )),
-                                        onPressed: () async {
-                                          final navigator = Navigator.of(context);
-                                          setState(() => deletingRecipe = true); 
-                                          SharedPreferences sp = await SharedPreferences.getInstance();
-                                          String? token = sp.getString("token"); 
-                                          if (token == null) throw Exception("Null token");
-                                          Response response = await updateRecipeProgress(token, recps[0].id); 
-                                          if(response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
-                                          if(response.statusCode == 406) throw Exception("Id param not properly given");
-                                          if(response.statusCode == 500) throw Exception("500 response");
-                                          setState(() => deletingRecipe = false); 
-                                          navigator.pushNamed("finishedRecipesWithReload");
-                                        },
-                                        child: const Text("Complete Recipe"));
+        style: OutlinedButton.styleFrom(
+            side: const BorderSide(width: 2.0, color: lightBlue),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            )),
+        onPressed: () async {
+          final navigator = Navigator.of(context);
+          setState(() => deletingRecipe = true);
+          SharedPreferences sp = await SharedPreferences.getInstance();
+          String? token = sp.getString("token");
+          if (token == null) throw Exception("Null token");
+          Response response = await updateRecipeProgress(token, recps[0].id);
+          if (response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");
+          if (response.statusCode == 406) throw Exception("Id param not properly given");
+          if (response.statusCode == 500) throw Exception("500 response");
+          setState(() => deletingRecipe = false);
+          navigator.pushNamed("finishedRecipesWithReload");
+        },
+        child: const Text("Complete Recipe"));
   }
 
   OutlinedButton AddIterationButton(Recipe r) {
@@ -153,14 +153,9 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
     if (recipesFromPrefs != null) return recipesFromPrefs;
     final String? token = sp.getString("token");
     if (token == null) throw Exception("Null token");
-    Response response = await getRecipeIterations(token, id);
-    if (response.statusCode != 202) {
-      loadingError("Error loading recipes");
-      return null;
-    }
     try {
-      final List<String> strRecipes = [for (var r in jsonDecode(response.body)["iterations"]) jsonEncode(r)];
-      sp.setStringList("${id.toString()} iterations", strRecipes);
+     List<String>? strRecipes = await getRecipeIterationsAndSetPrefs(token, id, sp, loadingError);
+      if(strRecipes == null) throw Exception("Recipes null");
       return Recipe.stringsToRecipes(strRecipes);
     } catch (e) {
       throw Exception("$e, could not parse iterations body");

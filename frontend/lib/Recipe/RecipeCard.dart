@@ -18,7 +18,10 @@ class RecipeCard extends StatefulWidget {
   final Function setFocusRecipe;
   final Function deleteInProgressToggle;
   final Function resetDeleteIndex;
+  final Function loadingError;
   final int deleteIPIndex;
+  final bool forceReload;
+
   final int index;
   const RecipeCard({
     super.key,
@@ -29,6 +32,8 @@ class RecipeCard extends StatefulWidget {
     required this.deleteInProgressToggle,
     required this.deleteIPIndex,
     required this.resetDeleteIndex,
+    required this.forceReload,
+    required this.loadingError,
   });
   static const double imageHeight = 84;
   static const double imageWidth = 150;
@@ -39,28 +44,27 @@ class RecipeCard extends StatefulWidget {
 }
 
 class _RecipeCardState extends State<RecipeCard> {
+  late Future<Recipe?>? recsReturn;
+  @override
+  void initState() {
+    super.initState();
+    recsReturn = getRecipeFinalVersion(widget.recipe.id.toString(), widget.loadingError, widget.forceReload);
+  }
+
   //Padding
-  final titlePadding =
-      const EdgeInsets.only(top: 12, left: RecipeCard.sidePadding, right: 12);
+  final titlePadding = const EdgeInsets.only(top: 12, left: RecipeCard.sidePadding, right: 12);
 
   final sidePadding = 26.0;
-  final procandIngPadding = const EdgeInsets.only(
-      left: RecipeCard.sidePadding,
-      top: 8,
-      bottom: 4,
-      right: RecipeCard.sidePadding);
+  final procandIngPadding = const EdgeInsets.only(left: RecipeCard.sidePadding, top: 8, bottom: 4, right: RecipeCard.sidePadding);
 
   final lastEditedPadding = const EdgeInsets.only(right: 12, bottom: 8);
 
   //Style
-  final titleStyle = GoogleFonts.merriweatherSans(
-      fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: -0.8);
+  final titleStyle = GoogleFonts.merriweatherSans(fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: -0.8);
 
-  final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16));
+  final cardShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
 
-  final deleteRecipeAnimation =
-      const SpinKitCubeGrid(color: lightBlue, size: 200);
+  final deleteRecipeAnimation = const SpinKitCubeGrid(color: lightBlue, size: 200);
 
   final dt = DateFormat('h:mm a M-d');
   final lastEditedTexStyle = const TextStyle(fontSize: 11, fontStyle: FontStyle.italic);
@@ -72,128 +76,123 @@ class _RecipeCardState extends State<RecipeCard> {
   Widget build(BuildContext context) {
     final disableButtons = widget.deleteIPIndex != -1;
 
-    final blurValue =
-        widget.deleteIPIndex == -1 || widget.deleteIPIndex == widget.index
-            ? 0.0
-            : 4.0;
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height / 3.5,
-        child: deletingRecipe
-            ? deleteRecipeAnimation
-            : GestureDetector(
-                onTap: () =>
-                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  FullRecipePageView(recipe:widget.recipe))),
-                    // {if (!disableButtons) widget.setFocusRecipe(widget.recipe)},
-                child: Card(
-                    shape: cardShape,
-                    elevation: cardElevation,
-                    shadowColor: greyColor,
-                    color: Colors.white,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: titlePadding,
-                          child: Row(
+    final blurValue = widget.deleteIPIndex == -1 || widget.deleteIPIndex == widget.index ? 0.0 : 4.0;
+
+    return FutureBuilder<Recipe?>(
+        future: recsReturn,
+        builder: (context, snapshot) {
+          Recipe recipe;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SpinKitWave(color: lightBlue, size: 50);
+          }
+          recipe = snapshot.data == null ? widget.recipe : snapshot.data!;
+
+          return ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: blurValue, sigmaY: blurValue),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height / 3.5,
+              child: deletingRecipe
+                  ? deleteRecipeAnimation
+                  : GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FullRecipePageView(recipe: recipe))),
+                      // {if (!disableButtons) widget.setFocusRecipe(recipe)},
+                      child: Card(
+                          shape: cardShape,
+                          elevation: cardElevation,
+                          shadowColor: greyColor,
+                          color: Colors.white,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Expanded(
-                                  child: Text(
-                                widget.recipe.title,
-                                style: titleStyle,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              )),
-                            ],
-                          ),
-                        ),
-                        Flexible(
-                          fit: FlexFit.loose,
-                          child: Container(
-                              padding: procandIngPadding,
-                              height: 200,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                      child: ListView.builder(
-                                          itemCount:
-                                              widget.recipe.ingredients.length,
-                                          itemBuilder:
-                                              (BuildContext context, int i) {
-                                            return Text(bullet +
-                                                widget.recipe.ingredients[i]);
-                                          })),
-                                  Expanded(
-                                      child: ListView.builder(
-                                          itemCount:
-                                              widget.recipe.procedure.length,
-                                          itemBuilder:
-                                              (BuildContext context, int i) {
-                                            return Text(
-                                                "${i + 1}. ${widget.recipe.procedure[i]}");
-                                          })),
-                                ],
-                              )),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            IconButton(
-                                onPressed: () async {
-                                  if (!disableButtons) {
-                                    widget.deleteInProgressToggle(widget.index);
-                                    await confirmDelete(
-                                            context, widget.recipe.title)
-                                        .then((delete) {
-                                      if (delete) {
-                                        setState(() => deletingRecipe = true);
-                                        SharedPreferences.getInstance()
-                                            .then((prefs) {
-                                          return prefs.getString('token') ?? "";
-                                        }).then((key) {
-                                          if (key == "") throw Exception("Empty key");
-                                          return deleteRecipe(
-                                              key, widget.recipe.id.toString());
-                                        }).then((res) {
-                                          if (res.statusCode >= 300) {
-                                            deleteRecipeErrorPopUp(
-                                                "Error deleting recipe");
-                                          } else {
-                                            widget.removeFunc(widget.index);
-                                          }
-                                          setState(
-                                              () => deletingRecipe = false);
-                                        });
-                                      }
-                                    });
-                                    widget.resetDeleteIndex();
-                                  }
-                                },
-                                icon: const Icon(Icons.delete)),
-                            Padding(
-                              padding: lastEditedPadding,
-                              child: Text(
-                                "Last edited ${dt.format(DateTime.parse(widget.recipe.last_edited))}",
-                                style: lastEditedTexStyle,
+                              Container(
+                                padding: titlePadding,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Text(
+                                      recipe.title,
+                                      style: titleStyle,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    )),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      ],
-                    )),
-              ),
-      ),
-    );
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: Container(
+                                    padding: procandIngPadding,
+                                    height: 200,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                            child: ListView.builder(
+                                                itemCount: recipe.ingredients.length,
+                                                itemBuilder: (BuildContext context, int i) {
+                                                  return Text(bullet + recipe.ingredients[i]);
+                                                })),
+                                        Expanded(
+                                            child: ListView.builder(
+                                                itemCount: recipe.procedure.length,
+                                                itemBuilder: (BuildContext context, int i) {
+                                                  return Text("${i + 1}. ${recipe.procedure[i]}");
+                                                })),
+                                      ],
+                                    )),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        if (!disableButtons) {
+                                          widget.deleteInProgressToggle(widget.index);
+                                          await confirmDelete(context,recipe.title).then((delete) {
+                                            if (delete) {
+                                              setState(() => deletingRecipe = true);
+                                              SharedPreferences.getInstance().then((prefs) {
+                                                return prefs.getString('token') ?? "";
+                                              }).then((key) {
+                                                if (key == "") throw Exception("Empty key");
+                                                return deleteRecipe(key, recipe.id.toString());
+                                              }).then((res) async {
+                                                if (res.statusCode >= 300) {
+                                                  print(res.body);
+                                                  deleteRecipeErrorPopUp("Error deleting recipe");
+                                                } else {
+                                                  SharedPreferences prefs = await SharedPreferences.getInstance(); 
+                                                  deleteBeginningRecipeFromPrefs(prefs, (recipe.parentRID ?? recipe.id).toString());
+                                                  widget.removeFunc();
+                                                }
+                                                setState(() => deletingRecipe = false);
+                                              });
+                                            }
+                                          });
+                                          widget.resetDeleteIndex();
+                                        }
+                                      },
+                                      icon: const Icon(Icons.delete)),
+                                  Padding(
+                                    padding: lastEditedPadding,
+                                    child: Text(
+                                      "Last edited ${dt.format(DateTime.parse(recipe.last_edited))}",
+                                      style: lastEditedTexStyle,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          )),
+                    ),
+            ),
+          );
+        });
   }
 
   void deleteRecipeErrorPopUp(String text, {int duration = 2250}) {
     final snack = snackBarError(text, duration);
     ScaffoldMessenger.of(context).showSnackBar(snack);
   }
-
-  
 }

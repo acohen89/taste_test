@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taste_test/Ingredient/IngredientClass.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
@@ -79,6 +81,40 @@ Future<bool> confirmDelete(BuildContext context, String title) {
   );
   ScaffoldMessenger.of(context).showSnackBar(snack);
   return completer.future;
+}
+
+Future<Recipe?>? getRecipeFinalVersion(String id, Function loadingError, bool forceReload) async {
+SharedPreferences sp = await SharedPreferences.getInstance(); 
+String? token = sp.getString("token");
+if(token == null) throw Exception("Null token");
+String? recipe = await getIterationAndSetPrefs(id, sp, token, loadingError, forceReload); 
+if(recipe == null) return null; 
+return Recipe.stringsToRecipes([recipe])!.first;
+
+
+}
+
+Future<String> getIterationAndSetPrefs(String id, SharedPreferences sp, String token, Function loadingError, bool forceReload) async {
+  if (sp.containsKey("$id iterations") && !forceReload) {
+    List<String>? strRecipes = sp.getStringList("$id iterations");
+    if (strRecipes == null) throw Exception("Null recipe");
+    return strRecipes.last;
+  } else {
+    List<String>? recipeIterations = await getRecipeIterationsAndSetPrefs(token, int.parse(id), sp, loadingError);
+    if (recipeIterations == null) throw Exception("null recipe");
+    return recipeIterations.last;
+  }
+}
+
+Future<List<String>?> getRecipeIterationsAndSetPrefs(String token, int id, SharedPreferences sp, Function loadingError) async {
+  Response response = await getRecipeIterations(token, id);
+  if (response.statusCode != 202) {
+    loadingError("Error loading recipes");
+    return null;
+  }
+  final List<String> strRecipes = [for (var r in jsonDecode(response.body)["iterations"]) jsonEncode(r)];
+  sp.setStringList("${id.toString()} iterations", strRecipes);
+  return strRecipes;
 }
 
 Future<List<Recipe>?> getMainRecipes(Function filter, SharedPreferences prefs, String token, Function loadingError, bool forceReload) async {
@@ -160,6 +196,11 @@ void deleteIterationFromPrefs(SharedPreferences sp, String parentRID, String id)
 Future<void> deleteBeginningRecipeFromPrefs(SharedPreferences sp, String id) async {
   if (!sp.containsKey("$id iterations")) throw Exception("sp does contain beginning $id iterations, trying to deleteBeginningRecipeFromPrefs");
   if (!sp.containsKey(id)) throw Exception("sp does contain recipe $id, trying to deleteBeginningRecipeFromPrefs");
+  List<String>? idList = sp.getStringList("recipeIDList"); 
+  if (idList == null) throw Exception("recipeIDList not in sp, in deleteBeginningRecipeFromPrefs");
+  bool hasId = idList.remove(id); 
+  if (!hasId) throw Exception("recipeIDList does not contain $id, in deleteBeginningRecipeFromPrefs");
+  sp.setStringList("recipeIDList", idList); 
   await sp.remove(id);
   await sp.remove("$id iterations");
 }

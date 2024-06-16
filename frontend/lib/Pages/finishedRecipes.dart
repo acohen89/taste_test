@@ -13,7 +13,7 @@ import 'package:taste_test/Shared/globalFunctions.dart';
 import 'package:taste_test/Shared/constants.dart';
 
 class FinishedRecipes extends StatefulWidget {
-  final bool forceReload; 
+  final bool forceReload;
   const FinishedRecipes({super.key, this.forceReload = false});
 
   @override
@@ -33,7 +33,7 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
   @override
   void initState() {
     super.initState();
-    recs = loadMainRecipes(widget.forceReload);
+    recs = loadRecipeFinalVersion(widget.forceReload);
   }
 
   @override
@@ -49,10 +49,7 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
                   appBar: AppBar(
                     automaticallyImplyLeading: false,
                     title: const Text("Your Recipes"),
-                    actions: [
-                      IconButton(
-                          onPressed: () => Navigator.pushNamed(context, "createRecipe"), icon: const Icon(Icons.add))
-                    ],
+                    actions: [IconButton(onPressed: () => Navigator.pushNamed(context, "createRecipe"), icon: const Icon(Icons.add))],
                   ),
                   body: FutureBuilder<List<Recipe>?>(
                       future: recs,
@@ -69,20 +66,23 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
                             ],
                           );
                         }
+                        recipes = snapshot.data!; // needs a second non future to not display
                         List<Recipe> recps = snapshot.data!;
                         return ListView(
                           children: List.generate(recps.length, (i) {
                             return Padding(
                               padding: recipePadding,
-                              child: 
-                              RecipeCard(
-                                  recipe: recps[i],
-                                  removeFunc: removeRecipe,
-                                  index: i,
-                                  setFocusRecipe: setFocusRecipe,
-                                  deleteInProgressToggle: deleteInProgressOnIndex,
-                                  deleteIPIndex: deleteIPIndex,
-                                  resetDeleteIndex: resetDeleteIndex),
+                              child: RecipeCard(
+                                recipe: recps[i],
+                                removeFunc: updateRecipes,
+                                index: i,
+                                setFocusRecipe: setFocusRecipe,
+                                deleteInProgressToggle: deleteInProgressOnIndex,
+                                deleteIPIndex: deleteIPIndex,
+                                resetDeleteIndex: resetDeleteIndex,
+                                forceReload: widget.forceReload,
+                                loadingError: loadingError,
+                              ),
                             );
                           }),
                         );
@@ -91,19 +91,22 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
             focusedRecipe != null
                 ? Scaffold(
                     backgroundColor: Colors.transparent,
-                    body: 
-                    FullRecipeCard(
+                    body: FullRecipeCard(
                       recipe: focusedRecipe!,
                       exitFocusedRecipe: exitFocusedRecipe,
-                    )
-                    )
+                    ))
                 : Container(),
           ],
         ),
         bottomNavigationBar: const BottomNavBar(startIndex: 2));
   }
 
-  Future<List<Recipe>?> loadMainRecipes(bool forceReload) async {
+  void loadingError(String text, {int duration = 2250}) {
+    final snack = snackBarError(text, duration);
+    ScaffoldMessenger.of(context).showSnackBar(snack);
+  }
+
+  Future<List<Recipe>?> loadRecipeFinalVersion(bool forceReload) async {
     List<Recipe>? filter(List<Recipe>? result) => result?.where((r) => r.in_progress == false).toList();
     await retrieveUserDetails();
     if (token == null) throw Exception("Null token");
@@ -119,10 +122,13 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
     });
     return;
   }
+  updateRecipes(){
+    recs = loadRecipeFinalVersion(false); 
+  }
 
   void deleteUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); 
+    await prefs.clear();
   }
 
   void deleteInProgressOnIndex(int index) {
@@ -151,11 +157,6 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
     setState(() {
       recipes!.removeAt(index);
     });
-  }
-
-  void loadingError(String text, {int duration = 2250}) {
-    final snack = snackBarError(text, duration);
-    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
 
