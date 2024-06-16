@@ -111,6 +111,7 @@ class _inProgressRecipeBuilderState extends State<inProgressRecipeBuilder> {
         onPressed: () async {
           final navigator = Navigator.of(context);
           setState(() => deletingRecipe = true);
+          print("here");
           final String token = await getToken(null, "Complete Recipe in IPRecipeBuilder");
           Response response = await updateRecipeProgress(token, recps[0].id);
           if (response.statusCode == 404) throw Exception("Id ${recps[0].id} not found");

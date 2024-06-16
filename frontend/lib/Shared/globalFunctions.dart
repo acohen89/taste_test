@@ -212,10 +212,8 @@ void deleteUserDetails() async {
 
 
 Future<String> getToken([SharedPreferences? sp, String errorLocation=""]) async {
-  if(sp == null){
-    SharedPreferences sp = await SharedPreferences.getInstance();
-  }
-  String? token = sp!.getString("token");
+  sp ??= await SharedPreferences.getInstance();
+  String? token = sp.getString("token");
   if(token == null) throw Exception("Null token in $errorLocation");
   return token; 
 }

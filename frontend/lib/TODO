@@ -1,7 +1,6 @@
 - Ability to add images for recipes 
 
-
-- make get token function
+ 
 - handle api requests in apiCalls file
 
 

@@ -1,25 +1,34 @@
+import 'dart:developer';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:http/http.dart';
 
 // const ep = 'https://taste-test.up.railway.app/';
 const ep = 'http://127.0.0.1:8000/';
 
-Future<http.Response> deleteRecipe(String token, String id) async {
+Future<bool> deleteRecipe(String token, String id) async {
   final body = jsonEncode(<String, dynamic>{"id": id});
   try {
-    return await http.delete(
+    Response res = await http.delete(
       Uri.parse("${ep}recipe/delete_recipe"),
       headers: authHeader(token),
       body: body,
     );
+    if (res.statusCode == 404) {
+      log(jsonDecode(res.body));
+      return false;
+    }
+    return true;
   } catch (e) {
-    return http.Response("", 503, reasonPhrase: e.toString());
+    log(jsonDecode(e.toString()));
+    return false;
   }
 }
 
-Future<http.Response> createRecipe(String token, String title,
-    List<String> ingredients, List<String> procedure, String notes, bool beginningRecipe,
-    {int? parentRID}  ) async {
+Future<http.Response> createRecipe(String token, String title, List<String> ingredients, List<String> procedure, String notes, bool beginningRecipe,
+    {int? parentRID}) async {
   final body = jsonEncode(<String, dynamic>{
     "title": title,
     "parentRID": parentRID,
@@ -29,42 +38,48 @@ Future<http.Response> createRecipe(String token, String title,
     "ingredients": ingredients,
     "image_url": null,
     "procedure": procedure,
-    "notes": notes.isEmpty ? null : notes, 
+    "notes": notes.isEmpty ? null : notes,
     "in_progress": true,
   });
   try {
-    return await http.post(Uri.parse("${ep}recipe/create_recipe"),
-        headers: authHeader(token), body: body);
-  } catch (e) {
-    return http.Response("", 503, reasonPhrase: e.toString());
-  }
-}
-Future<http.Response> getRecipe(String token, int id,) async {
-  try {
-    return await http.get(Uri.parse("${ep}recipe/get_recipe/?id=$id"),
-        headers: authHeader(token));
+    return await http.post(Uri.parse("${ep}recipe/create_recipe"), headers: authHeader(token), body: body);
   } catch (e) {
     return http.Response("", 503, reasonPhrase: e.toString());
   }
 }
 
-Future<http.Response> updateRecipeProgress(String token, int id,) async {
+Future<http.Response> getRecipe(
+  String token,
+  int id,
+) async {
   try {
-    return await http.post(Uri.parse("${ep}recipe/update_recipe_progress/?id=$id"),
-        headers: authHeader(token));
-  } catch (e) {
-    return http.Response("", 503, reasonPhrase: e.toString());
-  }
-}
-Future<http.Response> getRecipeIterations(String token, int id,) async {
-  try {
-    return await http.get(Uri.parse("${ep}recipe/get_recipe_iterations/?id=$id"),
-        headers: authHeader(token));
+    return await http.get(Uri.parse("${ep}recipe/get_recipe/?id=$id"), headers: authHeader(token));
   } catch (e) {
     return http.Response("", 503, reasonPhrase: e.toString());
   }
 }
 
+Future<http.Response> updateRecipeProgress(
+  String token,
+  int id,
+) async {
+  try {
+    return await http.post(Uri.parse("${ep}recipe/update_recipe_progress/?id=$id"), headers: authHeader(token));
+  } catch (e) {
+    return http.Response("", 503, reasonPhrase: e.toString());
+  }
+}
+
+Future<http.Response> getRecipeIterations(
+  String token,
+  int id,
+) async {
+  try {
+    return await http.get(Uri.parse("${ep}recipe/get_recipe_iterations/?id=$id"), headers: authHeader(token));
+  } catch (e) {
+    return http.Response("", 503, reasonPhrase: e.toString());
+  }
+}
 
 Future<http.Response> getUserRecipes(String token) async {
   try {
@@ -83,15 +98,13 @@ Future<http.Response> login(String username, String password) async {
     "password": password,
   });
   try {
-    return await http.post(Uri.parse("${ep}login"),
-        headers: defaultHeader(), body: body);
+    return await http.post(Uri.parse("${ep}login"), headers: defaultHeader(), body: body);
   } catch (e) {
     return http.Response(jsonEncode(body), 503, reasonPhrase: e.toString());
   }
 }
 
-Future<http.Response> signup(String username, String password, String fname,
-    String lname, String email) async {
+Future<http.Response> signup(String username, String password, String fname, String lname, String email) async {
   final body = jsonEncode(<String, String>{
     "username": username,
     "first_name": fname,
@@ -111,10 +124,7 @@ Future<http.Response> signup(String username, String password, String fname,
 }
 
 Map<String, String> authHeader(String token) {
-  return {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'Authorization': 'token $token'
-  };
+  return {'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token $token'};
 }
 
 Map<String, String> defaultHeader() {

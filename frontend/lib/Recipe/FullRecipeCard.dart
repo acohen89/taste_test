@@ -79,9 +79,9 @@ class _inProgressRecipeCardState extends State<inProgressRecipeCard> {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           final String token = await getToken(sp, "deleteRecipe in fullRecipeCard");
                           if (token == null) return deleteRecipeErrorPopUp("Error deleting recipe", "Null Token ");
-                          Response res = await deleteRecipe(token, widget.recipe.id.toString());
-                          if (res.statusCode >= 300) {
-                            return deleteRecipeErrorPopUp("Error deleting recipe", res.body);
+                          bool success =  await deleteRecipe(token, widget.recipe.id.toString());
+                          if (!success) {
+                            return deleteRecipeErrorPopUp("Error deleting recipe", "");
                           } else {
                             if (widget.recipe.beginningRecipe) {
                               await deleteBeginningRecipeFromPrefs(sp, widget.recipe.id.toString());
