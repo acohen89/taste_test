@@ -7,6 +7,7 @@ import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:taste_test/Shared/apiCalls.dart';
 import 'package:taste_test/Shared/constants.dart';
+import 'package:taste_test/Shared/globalFunctions.dart';
 
 class FullRecipePageView extends StatefulWidget {
   final Recipe recipe;
@@ -65,9 +66,7 @@ class _FullRecipePageViewState extends State<FullRecipePageView> {
   }
 
   Future<void> changeFinishedRecipeToIP(Recipe r) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? token = sp.getString("token");
-    if (token == null) throw Exception("Null token");
+    final String token = await getToken(null, "changeFinishedRecipeToIP");
     Response res = await updateRecipeProgress(token, r.parentRID ?? r.id);
     if (res.statusCode == 404) throw Exception("Id ${r.id} not found");
     if (res.statusCode == 406) throw Exception("Id param not properly given");
