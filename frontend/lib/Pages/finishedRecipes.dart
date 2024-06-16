@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
+import 'package:taste_test/Recipe/fullRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
-import 'package:taste_test/Recipe/FullRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeCard.dart';
 import 'package:taste_test/Components/BottomNavBar.dart';
 import 'package:taste_test/Components/noRecipe.dart';
@@ -88,14 +87,6 @@ class _FinishedRecipesState extends State<FinishedRecipes> {
                         );
                       })),
             ),
-            focusedRecipe != null
-                ? Scaffold(
-                    backgroundColor: Colors.transparent,
-                    body: FullRecipeCard(
-                      recipe: focusedRecipe!,
-                      exitFocusedRecipe: exitFocusedRecipe,
-                    ))
-                : Container(),
           ],
         ),
         bottomNavigationBar: const BottomNavBar(startIndex: 2));

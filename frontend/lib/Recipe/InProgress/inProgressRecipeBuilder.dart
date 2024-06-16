@@ -5,7 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taste_test/Pages/finishedRecipes.dart';
-import 'package:taste_test/Recipe/InProgress/inProgressRecipeCard.dart';
+import 'package:taste_test/Recipe/fullRecipeCard.dart';
 import 'package:taste_test/Recipe/RecipeClass.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:taste_test/Pages/createRecipe.dart';
