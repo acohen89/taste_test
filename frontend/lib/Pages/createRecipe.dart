@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:developer";
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -246,10 +247,16 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               final String token = await getToken(prefs, "create recipe");
                               setState(() => waitingForApiCallBack = true);
                               final List<String> ingredientList = ingredientsAddedController.map((i) => i.toString()).toList();
-                              var res = await createRecipe(token, titleController.text, ingredientList, procedureList, notesController.text, beginningRecipe,
+                              Response res = await createRecipe(token, titleController.text, ingredientList, procedureList, notesController.text, beginningRecipe,
                                   parentRID: widget.parentRID ?? widget.id);
                               setState(() => waitingForApiCallBack = false);
-                              if (res.statusCode >= 300) {
+                              if (res.statusCode == 400) {
+                                log(res.body); 
+                                errorPopUp("Error creating recipe");
+                                return;
+                              }
+                              if (res.statusCode == 406) {
+                                log("no parent id given, ${res.body}"); 
                                 errorPopUp("Error creating recipe");
                                 return;
                               }

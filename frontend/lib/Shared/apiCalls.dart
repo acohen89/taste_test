@@ -59,14 +59,28 @@ Future<http.Response> getRecipe(
   }
 }
 
-Future<http.Response> updateRecipeProgress(
+Future<bool> updateRecipeProgress(
   String token,
   int id,
 ) async {
   try {
-    return await http.post(Uri.parse("${ep}recipe/update_recipe_progress/?id=$id"), headers: authHeader(token));
+    Response res =  await http.post(Uri.parse("${ep}recipe/update_recipe_progress/?id=$id"), headers: authHeader(token));
+    switch (res.statusCode) {
+      case 404:
+        log("Id $id not found: ${res.body}");
+        return false;
+      case 406:
+        log("Id param not properly given: ${res.body}");
+        return false;
+      case 500:
+        log("500: ${res.body}");
+        return false;
+      default:  
+        return true; 
+    }
   } catch (e) {
-    return http.Response("", 503, reasonPhrase: e.toString());
+    log(e.toString()); 
+    return false;
   }
 }
 

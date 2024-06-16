@@ -67,11 +67,13 @@ class _FullRecipePageViewState extends State<FullRecipePageView> {
 
   Future<void> changeFinishedRecipeToIP(Recipe r) async {
     final String token = await getToken(null, "changeFinishedRecipeToIP");
-    Response res = await updateRecipeProgress(token, r.parentRID ?? r.id);
-    if (res.statusCode == 404) throw Exception("Id ${r.id} not found");
-    if (res.statusCode == 406) throw Exception("Id param not properly given");
-    if (res.statusCode == 500) throw Exception("500 response");
+    bool success = await updateRecipeProgress(token, r.parentRID ?? r.id);
+    if(!success) errorPopUp("Edit function not working"); 
     //successful
     return;
+  }
+   void errorPopUp(String text, {int duration = 2250}) {
+    final snack = snackBarError(text, duration);
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 }
