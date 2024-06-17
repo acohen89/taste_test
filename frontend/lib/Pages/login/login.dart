@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
         body: Stack(
       children: [
         Image.asset('Assets/Logo.PNG'),
@@ -80,50 +81,47 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 SizedBox(height: MediaQuery.of(context).size.width * 0.05),
-                Column(
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return const Center(child: CircularProgressIndicator());
+                            });
+                        Response res = await login(usernameController.text, passwordController.text);
+                        Navigator.of(context).pop();
+                        if (res.statusCode < 300) {
+                          setPrefs(res.body);
+                          Navigator.of(context).pushNamed("finishedRecipes");
+                          return;
+                        }
+                        if (res.statusCode == 404) {
+                          loginErrorPopUp("Username or password does not match");
+                          return;
+                        }
+                        if (res.statusCode >= 500) {
+                          loginErrorPopUp("Error logging in, please try again later");
+                          return;
+                        }
+                      },
+                      child: const Text("Login")),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return const Center(child: CircularProgressIndicator());
-                                });
-                            Response res = await login(usernameController.text, passwordController.text);
-                            Navigator.of(context).pop();
-                            if (res.statusCode < 300) {
-                              setPrefs(res.body);
-                              Navigator.of(context).pushNamed("finishedRecipes");
-                              return;
-                            }
-                            if (res.statusCode == 404) {
-                              loginErrorPopUp("Username or password does not match");
-                              return;
-                            }
-                            if (res.statusCode >= 500) {
-                              loginErrorPopUp("Error logging in, please try again later");
-                              return;
-                            }
-                          },
-                          child: const Text("Login")),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Don't have an account?"),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed("signUp");
-                            },
-                            child: const Text("Sign Up"))
-                      ],
-                    ),
+                    const Text("Don't have an account?"),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed("signUp");
+                        },
+                        child: const Text("Sign Up"))
                   ],
                 ),
               ],
-            )),
+            )
+            ),
       ],
     ));
   }

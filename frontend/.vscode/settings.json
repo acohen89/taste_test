@@ -3,5 +3,6 @@
         "calistoga",
         "merriweather",
         "spinkit"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
