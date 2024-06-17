@@ -131,7 +131,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       width: MediaQuery.of(context).size.width * 0.15,
                       child: QuantityTextField(quantityController: quantityController, hintTextStyle: hintTextStyle, ingredientInputRadius: ingredientInputRadius),
                     ),
-                    UnitDropDown(),
+                    unitController?.name != "none" ? UnitDropDown() : const SizedBox(width: 4,),
                     Expanded(
                       child: IngredientTextField(ingredientsController: ingredientsController, hintTextStyle: hintTextStyle, ingredientInputRadius: ingredientInputRadius),
                     ),
@@ -164,7 +164,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     Column(
                       children: [
                         Text(
-                          "Procedure",
+                          "Steps",
                           style: headingStyle,
                         ),
                       ],
@@ -172,27 +172,38 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ],
                 ),
                 procedureList.isNotEmpty
-                    ? ListView.builder(
+                    ? ReorderableListView.builder(
+                        onReorder:(oldIndex, newIndex) {
+                          setState(() {
+                            if(newIndex > oldIndex) newIndex--;
+                            final item = procedureList.removeAt(oldIndex); 
+                            procedureList.insert(newIndex, item);
+                          });
+                        },
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: procedureList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(padding: const EdgeInsets.only(right: 15), child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
-                                  Expanded(
-                                    child: Text(
-                                      procedureList[index],
-                                      maxLines: procedureMaxLines,
+                          return ReorderableDragStartListener(
+                            key: ValueKey(procedureList[index]),
+                            index: index,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(padding: const EdgeInsets.only(right: 15), child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
+                                    Expanded(
+                                      child: Text(
+                                        procedureList[index],
+                                        maxLines: procedureMaxLines,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(onPressed: () => setState(() => procedureList.removeAt(index)), icon: const Icon(Icons.delete))
-                                ],
-                              ),
-                              const Divider(),
-                            ],
+                                    IconButton(onPressed: () => setState(() => procedureList.removeAt(index)), icon: const Icon(Icons.delete))
+                                  ],
+                                ),
+                                const Divider(),
+                              ],
+                            ),
                           );
                         })
                     : Container(),
@@ -266,9 +277,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               addRecipeToPrefs(res, prefs, beginningRecipe, widget.parentRID ?? widget.id);
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const inProgressRecipes()));
                             },
-                            child: const Text(
-                              "Create Recipe",
-                              style: TextStyle(color: lightBlue, fontWeight: FontWeight.bold),
+                            child:  Text(
+                              "create ${isIter ? "iteration" : "recipe"}",
+                              style: const TextStyle(color: lightBlue, fontWeight: FontWeight.bold),
                             )),
                       )
               ],
@@ -301,10 +312,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
     }
   }
 
-  DropdownButton UnitDropDown() {
+  DropdownButton UnitDropDown() { 
+      List<DropdownMenuItem<Unit?>> items = Unit.values.map((Unit classType) {
+        return DropdownMenuItem(value: classType, child: Text(classType.name));
+      }).toList(); 
     return DropdownButton(
       hint: Text(
-        "Unit",
+        "Units",
         style: hintTextStyle,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -314,9 +328,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
           unitController = newValue;
         });
       },
-      items: Unit.values.map((Unit classType) {
-        return DropdownMenuItem<Unit>(value: classType, child: Text(classType.name));
-      }).toList(),
+      items: items,
     );
   }
 
@@ -343,7 +355,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
     if (q == null) {
       return;
     }
-    final Ingredient i = Ingredient(q, unitController!, ingredientsController.text);
+    Unit? u = unitController!.name == "none" ? null : unitController;  
+    final Ingredient i = Ingredient(q, u, ingredientsController.text);
     setState(() {
       ingredientsAddedController.add(i);
       quantityController.text = "";
