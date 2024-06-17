@@ -172,27 +172,38 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ],
                 ),
                 procedureList.isNotEmpty
-                    ? ListView.builder(
+                    ? ReorderableListView.builder(
+                        onReorder:(oldIndex, newIndex) {
+                          setState(() {
+                            if(newIndex > oldIndex) newIndex--;
+                            final item = procedureList.removeAt(oldIndex); 
+                            procedureList.insert(newIndex, item);
+                          });
+                        },
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: procedureList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(padding: const EdgeInsets.only(right: 15), child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
-                                  Expanded(
-                                    child: Text(
-                                      procedureList[index],
-                                      maxLines: procedureMaxLines,
+                          return ReorderableDragStartListener(
+                            key: ValueKey(procedureList[index]),
+                            index: index,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(padding: const EdgeInsets.only(right: 15), child: Text('${index + 1}.', style: const TextStyle(fontSize: 18))),
+                                    Expanded(
+                                      child: Text(
+                                        procedureList[index],
+                                        maxLines: procedureMaxLines,
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(onPressed: () => setState(() => procedureList.removeAt(index)), icon: const Icon(Icons.delete))
-                                ],
-                              ),
-                              const Divider(),
-                            ],
+                                    IconButton(onPressed: () => setState(() => procedureList.removeAt(index)), icon: const Icon(Icons.delete))
+                                  ],
+                                ),
+                                const Divider(),
+                              ],
+                            ),
                           );
                         })
                     : Container(),
