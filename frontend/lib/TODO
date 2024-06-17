@@ -9,7 +9,6 @@
 
 - allow reordering of procedure when creating recipe 
 - allow no units 
-- Turn functions into widgets
 
 - error pop up so it says a quanitty can't be a string in ingredient adding
 - HIGHLIGHT Changes in recipe iteration

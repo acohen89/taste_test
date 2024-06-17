@@ -25,7 +25,7 @@ class AddedIngredient extends StatelessWidget {
   );
   @override
   Widget build(BuildContext context) {
-    final double textSpaceing = MediaQuery.of(context).size.width * 0.02;
+    final double textSpacing = MediaQuery.of(context).size.width * 0.02;
     final double unitSpacing = MediaQuery.of(context).size.width * 0.01;
     String? q = quantity == null
         ? null
@@ -35,10 +35,10 @@ class AddedIngredient extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if(q!= null) Text(q!, style: fontStyle),
+            if(q!= null) Text(q, style: fontStyle),
            if (q != null)  SizedBox(width: unitSpacing),
            if (unit != null)  Text(unit!.name, style: fontStyle),
-            if (unit != null) SizedBox(width: textSpaceing),
+            if (unit != null) SizedBox(width: textSpacing),
             Expanded(child: AutoSizeText(food, style: fontStyle, maxLines: 3)),
             IconButton(onPressed: () => deleteFunction(index), icon: const Icon(Icons.delete))
           ],

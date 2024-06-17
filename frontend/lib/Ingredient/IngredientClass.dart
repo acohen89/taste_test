@@ -1,5 +1,5 @@
 import 'package:string_validator/string_validator.dart';
-enum Unit { g, ml, cup, tsp, tbs, gal, L, oz }
+enum Unit {none, g, ml, cup, tsp, tbs, gal, L, oz }
 
 Unit strToUnit(String s) {
   return Unit.values.firstWhere((e) => e.toString() == 'Unit.$s');
