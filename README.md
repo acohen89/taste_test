@@ -3,6 +3,8 @@
 
 Taste Test is a recipe development app designed for chefs of all kinds. It streamlines your receipe development process by allowing you to easily add new iterations of the recipes you're working on. 
 
+This app was built completely from scratch by Adam Cohen. The backend is Django Postgres and the frontend is Flutter.
+
 
 ## Screenshots
 
